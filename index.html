@@ -914,5 +914,198 @@ if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("./sw.js");
   });
 }
-</script></body>
+</script>
+<!-- MYTASKS - AUTENTICAÇÃO SUPABASE -->
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+#loginScreen {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  background: #101d32;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  color: white;
+}
+
+#loginScreen.hidden {
+  display: none;
+}
+
+.login-box {
+  width: 100%;
+  max-width: 380px;
+  background: #192a42;
+  padding: 28px;
+  border-radius: 20px;
+  box-shadow: 0 15px 45px #0006;
+}
+
+.login-box h2 {
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.login-box p {
+  text-align: center;
+  color: #a7bad2;
+}
+
+.login-box input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 14px;
+  margin-top: 13px;
+  border: 1px solid #40536c;
+  border-radius: 10px;
+  background: #101d32;
+  color: white;
+  font-size: 16px;
+}
+
+.login-box button {
+  width: 100%;
+  padding: 14px;
+  margin-top: 14px;
+  border: 0;
+  border-radius: 10px;
+  background: #2f80ed;
+  color: white;
+  font-weight: bold;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+#authMessage {
+  font-size: 13px;
+  margin-top: 15px;
+  text-align: center;
+}
+</style>
+
+<div id="loginScreen">
+  <div class="login-box">
+    <h2>MyTasks</h2>
+    <p>Entre ou crie sua conta</p>
+
+    <input
+      type="email"
+      id="authEmail"
+      placeholder="Seu e-mail"
+      autocomplete="email"
+    >
+
+    <input
+      type="password"
+      id="authPassword"
+      placeholder="Sua senha"
+      autocomplete="current-password"
+    >
+
+    <button onclick="loginMyTasks()">Entrar</button>
+
+    <button onclick="registerMyTasks()">
+      Criar minha conta
+    </button>
+
+    <div id="authMessage"></div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = "COLOQUE_SUA_PROJECT_URL";
+const SUPABASE_ANON_KEY = "COLOQUE_SUA_ANON_KEY";
+
+const myTasksSupabase = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
+
+const loginScreen = document.getElementById("loginScreen");
+const authMessage = document.getElementById("authMessage");
+
+function showAuthMessage(message) {
+  authMessage.textContent = message;
+}
+
+async function loginMyTasks() {
+  const email = document.getElementById("authEmail").value.trim();
+  const password = document.getElementById("authPassword").value;
+
+  if (!email || !password) {
+    return showAuthMessage("Preencha o e-mail e a senha.");
+  }
+
+  showAuthMessage("Verificando acesso...");
+
+  const { error } = await myTasksSupabase.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if (error) {
+    return showAuthMessage(error.message);
+  }
+}
+
+async function registerMyTasks() {
+  const email = document.getElementById("authEmail").value.trim();
+  const password = document.getElementById("authPassword").value;
+
+  if (!email || !password) {
+    return showAuthMessage("Preencha o e-mail e a senha.");
+  }
+
+  if (password.length < 6) {
+    return showAuthMessage("Use uma senha com pelo menos 6 caracteres.");
+  }
+
+  showAuthMessage("Criando sua conta...");
+
+  const { data, error } = await myTasksSupabase.auth.signUp({
+    email,
+    password
+  });
+
+  if (error) {
+    return showAuthMessage(error.message);
+  }
+
+  if (!data.session) {
+    return showAuthMessage(
+      "Cadastro criado! Confira seu e-mail para confirmar a conta."
+    );
+  }
+
+  showAuthMessage("Conta criada!");
+}
+
+myTasksSupabase.auth.onAuthStateChange((event, session) => {
+  if (session) {
+    loginScreen.classList.add("hidden");
+  } else {
+    loginScreen.classList.remove("hidden");
+  }
+});
+
+async function checkMyTasksSession() {
+  const { data, error } = await myTasksSupabase.auth.getSession();
+
+  if (!error && data.session) {
+    loginScreen.classList.add("hidden");
+  } else {
+    loginScreen.classList.remove("hidden");
+  }
+}
+
+checkMyTasksSession();
+</script>
+
+<!-- FIM DA AUTENTICAÇÃO -->
+</body>
 </html>
