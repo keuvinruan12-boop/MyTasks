@@ -1,0 +1,912 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#17152b">
+<title>MyTasks Ultimate</title>
+<style>
+:root{
+--bg:#111022;--surface:#1b1933;--surface2:#252243;
+--surface3:#302c52;--text:#f7f5ff;--muted:#aaa5c6;
+--accent:#9b5cff;--line:rgba(255,255,255,.09);
+--shadow:0 16px 40px rgba(0,0,0,.22);
+--font:Inter,system-ui,Arial,sans-serif
+}
+*{box-sizing:border-box}
+body{
+margin:0;min-height:100vh;padding-bottom:95px;color:var(--text);
+font-family:var(--font);
+background:radial-gradient(ellipse at 10% 0%,color-mix(in srgb,var(--accent) 15%,transparent),transparent 38%),var(--bg);
+background-attachment:fixed;background-size:cover;background-position:center
+}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer;border:0;border-radius:13px;padding:11px 15px;font-weight:700;color:white;background:var(--accent);transition:.2s}
+button:hover{filter:brightness(1.12);transform:translateY(-1px)}
+input,select,textarea{
+width:100%;padding:13px;margin:7px 0 14px;border:1px solid var(--line);
+border-radius:12px;background:var(--bg);color:var(--text);outline:none
+}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}
+textarea{min-height:95px;resize:vertical}
+label{font-size:12px;color:var(--muted);font-weight:700}
+.topbar{
+height:72px;padding:0 24px;display:flex;align-items:center;
+justify-content:space-between;position:sticky;top:0;z-index:10;
+background:color-mix(in srgb,var(--bg) 90%,transparent);
+backdrop-filter:blur(18px);border-bottom:1px solid var(--line)
+}
+.logo{font-size:22px;font-weight:900}
+.logo span{color:var(--accent)}
+.sub,.muted,small{color:var(--muted)}
+.sub{font-size:11px;margin-top:3px}
+.shell{max-width:1250px;margin:auto;padding:26px 28px 40px}
+.page{display:none;animation:fade .2s}
+.page.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+h1{font-size:clamp(25px,4vw,34px);margin:4px 0 8px;letter-spacing:-1px}
+h2{font-size:18px;margin:0 0 15px}
+.muted{font-size:13px;line-height:1.6}
+.card{
+background:linear-gradient(145deg,var(--surface2),var(--surface));
+border:1px solid var(--line);border-radius:21px;padding:20px;
+margin:15px 0;box-shadow:var(--shadow)
+}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin:20px 0}
+.grid>.card{margin:0}
+.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:750}
+.stat{font-size:29px;font-weight:850;margin-top:9px}
+.hero{
+min-height:160px;
+background:radial-gradient(circle at 90% 10%,color-mix(in srgb,var(--accent) 40%,transparent),transparent 42%),var(--surface2)
+}
+.hero .stat{font-size:40px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row>*{flex:1;min-width:130px}
+.item{
+display:flex;justify-content:space-between;align-items:center;gap:12px;
+padding:13px 15px;margin:9px 0;border-radius:15px;
+background:var(--surface2);border:1px solid var(--line)
+}
+.item.done{opacity:.55;text-decoration:line-through}
+.item small{display:block;font-size:11px;margin-top:4px}
+.item-actions{display:flex;gap:6px}
+.smallbtn{padding:8px 10px;font-size:12px}
+.secondary{background:var(--surface3)}
+.danger{background:#c34e65}
+.green{background:#159b78}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}
+.tabs button{background:var(--surface2);color:var(--muted)}
+.tabs button.active{background:var(--accent);color:white}
+.quick{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.quick button{
+background:var(--surface2);border:1px solid var(--line);
+color:var(--text);text-align:left;min-height:70px
+}
+.quick b{display:block;color:var(--accent);font-size:20px;margin-bottom:7px}
+.bottom-nav{
+position:fixed;z-index:20;bottom:12px;left:50%;
+transform:translateX(-50%);width:min(620px,calc(100% - 24px));
+height:70px;padding:6px;display:flex;justify-content:space-around;
+align-items:center;background:color-mix(in srgb,var(--surface) 94%,transparent);
+backdrop-filter:blur(20px);border:1px solid var(--line);
+border-radius:22px;box-shadow:0 15px 40px #0005
+}
+.nav-btn{
+height:54px;min-width:48px;padding:5px;background:transparent;
+color:var(--muted);display:flex;flex-direction:column;
+align-items:center;justify-content:center;gap:3px;font-size:10px
+}
+.nav-btn b{font-size:19px}
+.nav-btn.active{background:color-mix(in srgb,var(--accent) 18%,transparent);color:var(--accent)}
+.nav-add{
+height:56px;width:56px;border-radius:19px;font-size:27px;
+margin-top:-22px;border:5px solid var(--bg)
+}
+.palette{display:flex;gap:10px;flex-wrap:wrap}
+.swatch{width:36px;height:36px;padding:0;border:3px solid #ffffff66;border-radius:50%}
+.preview{max-width:100%;max-height:230px;display:block;margin:12px auto;border-radius:15px}
+.quiz-option{display:block;width:100%;text-align:left;margin:8px 0;background:var(--surface3)}
+#toast{
+display:none;position:fixed;z-index:40;bottom:100px;left:50%;
+transform:translateX(-50%);background:var(--surface3);
+padding:12px 18px;border:1px solid var(--line);
+border-radius:12px;box-shadow:var(--shadow)
+}
+#lockScreen{
+display:none;position:fixed;inset:0;z-index:50;background:#080817ed;
+align-items:center;justify-content:center;padding:20px
+}
+#lockScreen .card{width:min(370px,100%);text-align:center}
+@media(max-width:760px){
+.topbar{height:66px;padding:0 14px}
+.shell{padding:18px 13px 30px}
+.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.card{padding:16px;border-radius:17px}
+.stat{font-size:25px}
+.hero .stat{font-size:36px}
+.nav-btn{min-width:42px}
+.nav-btn span{font-size:9px}
+}
+@media(min-width:761px){
+body{padding-bottom:25px}
+.bottom-nav{left:20px;top:95px;bottom:auto;transform:none;width:76px;height:auto;flex-direction:column;padding:10px}
+.nav-btn{width:54px}
+.nav-add{margin:8px 0}
+.shell{padding-left:125px}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+<div>
+<div class="logo">My<span>Tasks</span> Ultimate</div>
+<div class="sub">Organize sua rotina com inteligência</div>
+</div>
+<button class="secondary" onclick="lockNow()">🔒 Bloquear</button>
+</header>
+
+<main class="shell">
+
+<section id="home" class="page active">
+<h1>Bem-vindo ao MyTasks 👋</h1>
+<p class="muted">Seu espaço para organizar estudos, tarefas e projetos.</p>
+<div class="card hero">
+<div class="eyebrow">Seu progresso</div>
+<div class="stat" id="progress">0%</div>
+<div class="muted">das tarefas concluídas</div>
+</div>
+<div class="grid">
+<div class="card"><div class="eyebrow">Tarefas totais</div><div class="stat" id="totalTasks">0</div></div>
+<div class="card"><div class="eyebrow">Pendentes</div><div class="stat" id="pendingTasks">0</div></div>
+<div class="card"><div class="eyebrow">Concluídas</div><div class="stat" id="completedTasks">0</div></div>
+<div class="card"><div class="eyebrow">Saldo financeiro</div><div class="stat" id="homeBalance">R$ 0,00</div></div>
+</div>
+<div class="card">
+<h2>⚡ Acesso rápido</h2>
+<div class="quick">
+<button onclick="showPage('tasks')"><b>＋</b>Nova tarefa</button>
+<button onclick="showPage('notes')"><b>▤</b>Nova anotação</button>
+<button onclick="showPage('quiz')"><b>✦</b>Começar simulado</button>
+<button onclick="showPage('tools')"><b>⌘</b>Ferramentas</button>
+</div>
+</div>
+<div class="card"><h2>📌 Próximas tarefas</h2><div id="homeUpcoming"></div></div>
+</section>
+
+<section id="tasks" class="page">
+<h1>📋 Gerenciador de tarefas</h1>
+<div class="card">
+<h2>Adicionar tarefa</h2>
+<input id="taskName" placeholder="Nome da tarefa">
+<div class="row">
+<div><label>Data</label><input type="date" id="taskDate"></div>
+<div><label>Prioridade</label><select id="taskPriority"><option>Normal</option><option>Alta</option><option>Baixa</option></select></div>
+</div>
+<input id="taskCategory" placeholder="Categoria (escola, pessoal...)">
+<button onclick="addTask()">Adicionar tarefa</button>
+</div>
+<div class="tabs">
+<button class="active" onclick="filterTasks('all',this)">Todas</button>
+<button onclick="filterTasks('pending',this)">Pendentes</button>
+<button onclick="filterTasks('done',this)">Feitas</button>
+<button onclick="filterTasks('late',this)">Atrasadas</button>
+</div>
+<div id="taskList"></div>
+</section>
+
+<section id="calendar" class="page">
+<h1>📅 Calendário</h1>
+<div class="card">
+<label>Escolha uma data</label>
+<input type="date" id="calendarDate" onchange="renderCalendar()">
+<div id="calendarTasks"></div>
+</div>
+</section>
+
+<section id="notes" class="page">
+<h1>📝 Anotações</h1>
+<div class="card">
+<input id="noteTitle" placeholder="Título">
+<textarea id="noteText" placeholder="Escreva sua anotação..."></textarea>
+<button onclick="addNote()">Salvar anotação</button>
+</div>
+<div id="noteList"></div>
+</section>
+
+<section id="finance" class="page">
+<h1>💰 Controle financeiro</h1>
+<div class="grid">
+<div class="card"><div class="eyebrow">Entradas</div><div class="stat" id="incomeTotal">R$ 0,00</div></div>
+<div class="card"><div class="eyebrow">Despesas</div><div class="stat" id="expenseTotal">R$ 0,00</div></div>
+<div class="card"><div class="eyebrow">Saldo</div><div class="stat" id="balanceTotal">R$ 0,00</div></div>
+</div>
+<div class="card">
+<h2>Adicionar movimentação</h2>
+<input id="financeDescription" placeholder="Descrição">
+<input id="financeAmount" type="number" min="0" step="0.01" placeholder="Valor em R$">
+<select id="financeType"><option value="income">Entrada</option><option value="expense">Despesa</option></select>
+<button onclick="addFinance()">Salvar movimentação</button>
+</div>
+<div class="card"><h2>Histórico</h2><div id="financeList"></div></div>
+</section>
+
+<section id="invest" class="page">
+<h1>📈 Aprenda sobre investimentos</h1>
+<div class="card">
+<h2>Conceitos importantes</h2>
+<p><b>Reserva de emergência:</b> dinheiro guardado para imprevistos.</p>
+<p><b>Renda fixa:</b> investimentos com regras de remuneração definidas.</p>
+<p><b>Renda variável:</b> investimentos cujo valor pode subir ou cair.</p>
+<p><b>Diversificação:</b> distribuir recursos para não depender de um único investimento.</p>
+<p><b>Juros compostos:</b> juros calculados também sobre rendimentos anteriores.</p>
+<p class="muted">Conteúdo educativo. Simulações não garantem resultados.</p>
+</div>
+<div class="card">
+<h2>Simulador educativo de juros compostos</h2>
+<div class="row">
+<div><label>Valor inicial (R$)</label><input id="simInitial" type="number" min="0" value="100"></div>
+<div><label>Depósito mensal (R$)</label><input id="simMonthly" type="number" min="0" value="20"></div>
+</div>
+<div class="row">
+<div><label>Taxa mensal hipotética (%)</label><input id="simRate" type="number" step=".1" value="0.5"></div>
+<div><label>Tempo (meses)</label><input id="simMonths" type="number" min="0" max="600" value="12"></div>
+</div>
+<button onclick="simulate()">Calcular simulação</button>
+<h2 id="simResult">Resultado: R$ 0,00</h2>
+</div>
+</section>
+
+<section id="study" class="page">
+<h1>🎓 Central de estudos e ajuda com IA</h1>
+<div class="card">
+<h2>Assistente de estudos</h2>
+<p class="muted">Prepare uma pergunta para usar em uma ferramenta de IA. Não há conexão automática com serviço externo.</p>
+<select id="aiSubject">
+<option>Matemática</option><option>Português</option><option>História</option><option>Geografia</option><option>Ciências</option><option>Inglês</option>
+</select>
+<textarea id="aiQuestion" placeholder="Digite sua dúvida ou cole o enunciado..."></textarea>
+<button onclick="prepareAI()">Preparar pergunta</button>
+<textarea id="aiOutput" placeholder="Sua pergunta organizada aparecerá aqui."></textarea>
+<button class="secondary" onclick="copyText('aiOutput')">Copiar pergunta</button>
+</div>
+<div class="card"><h2>📚 Dica de estudo</h2><p>Estude em blocos curtos, faça pausas e tente explicar o assunto com suas próprias palavras.</p></div>
+</section>
+
+<section id="quiz" class="page">
+<h1>🧠 Mini simulados</h1>
+<div class="card">
+<label>Série escolar</label>
+<select id="quizGrade">
+<option>6º ano</option><option selected>7º ano</option><option>8º ano</option><option>9º ano</option><option>Ensino médio</option>
+</select>
+<label>Matéria</label>
+<select id="quizSubject">
+<option>Matemática</option><option>Português</option><option>História</option><option>Geografia</option><option>Ciências</option><option>Inglês</option>
+</select>
+<button onclick="startQuiz()">Iniciar simulado</button>
+</div>
+<div class="card" id="quizArea"><p class="muted">Escolha uma série e uma matéria para começar.</p></div>
+</section>
+
+<section id="camera" class="page">
+<h1>📷 Câmera e imagens</h1>
+<div class="card">
+<p>Fotografe uma atividade ou selecione uma imagem da galeria.</p>
+<input type="file" accept="image/*" capture="environment" onchange="showImage(event)">
+<img id="cameraPreview" class="preview" alt="Prévia" style="display:none">
+<button class="secondary" onclick="clearImage()">Limpar imagem</button>
+<p class="muted">O reconhecimento automático depende de uma ferramenta de IA conectada.</p>
+</div>
+</section>
+
+<section id="travel" class="page">
+<h1>✈️ Planejador de viagens</h1>
+<div class="card">
+<label>Origem</label><input id="travelFrom" placeholder="Ex.: Porto Velho">
+<label>Destino</label><input id="travelTo" placeholder="Ex.: São Paulo">
+<div class="row">
+<div><label>Ida</label><input id="travelDate" type="date"></div>
+<div><label>Volta</label><input id="travelReturn" type="date"></div>
+</div>
+<div class="row">
+<div><label>Passageiros</label><input id="travelPeople" type="number" min="1" value="1"></div>
+<div><label>Classe</label><select id="travelClass"><option>Econômica</option><option>Executiva</option><option>Primeira classe</option></select></div>
+</div>
+<button onclick="prepareTravel()">Preparar pesquisa</button>
+<textarea id="travelOutput" placeholder="Sua pesquisa será organizada aqui."></textarea>
+<button class="secondary" onclick="copyText('travelOutput')">Copiar pesquisa</button>
+<button class="secondary" onclick="saveTravel()">Salvar planejamento</button>
+</div>
+<div class="card"><h2>Planejamentos salvos</h2><div id="travelList"></div></div>
+</section>
+
+<section id="tools" class="page">
+<h1>🧰 Ferramentas úteis</h1>
+<div class="card">
+<h2>Calculadora</h2>
+<div class="row">
+<input id="calcA" type="number" placeholder="Primeiro número">
+<select id="calcOp"><option value="+">+</option><option value="-">−</option><option value="*">×</option><option value="/">÷</option></select>
+<input id="calcB" type="number" placeholder="Segundo número">
+</div>
+<button onclick="calculate()">Calcular</button>
+<h2 id="calcResult">Resultado: —</h2>
+</div>
+<div class="card">
+<h2>⏱️ Temporizador</h2>
+<div class="row">
+<input id="timerMinutes" type="number" value="25" min="1">
+<button onclick="startTimer()">Iniciar</button>
+<button class="secondary" onclick="pauseTimer()">Pausar</button>
+<button class="danger" onclick="resetTimer()">Zerar</button>
+</div>
+<div class="stat" id="timerDisplay">25:00</div>
+</div>
+</section>
+
+<section id="settings" class="page">
+<h1>⚙️ Configurações</h1>
+<div class="card">
+<h2>🎨 Personalizar cores</h2>
+<p class="muted">Escolha uma cor de destaque sem mudar o estilo da interface.</p>
+<div class="palette">
+<button class="swatch" style="background:#9b5cff" onclick="changeAccent('#9b5cff')"></button>
+<button class="swatch" style="background:#287cf0" onclick="changeAccent('#287cf0')"></button>
+<button class="swatch" style="background:#16a085" onclick="changeAccent('#16a085')"></button>
+<button class="swatch" style="background:#e67e22" onclick="changeAccent('#e67e22')"></button>
+<button class="swatch" style="background:#e84d8a" onclick="changeAccent('#e84d8a')"></button>
+<button class="swatch" style="background:#d4a017" onclick="changeAccent('#d4a017')"></button>
+<button class="swatch" style="background:#00a6a6" onclick="changeAccent('#00a6a6')"></button>
+</div>
+<label>Cor personalizada</label>
+<input type="color" id="accentPicker" value="#9b5cff" onchange="changeAccent(this.value)">
+</div>
+<div class="card">
+<h2>Modo de aparência</h2>
+<select id="appearance" onchange="changeAppearance(this.value)">
+<option value="dark">Escuro</option><option value="light">Claro</option>
+</select>
+</div>
+<div class="card">
+<h2>🔤 Tipo de fonte</h2>
+<select id="fontChoice" onchange="changeFont(this.value)">
+<option value="Arial,sans-serif">Arial</option>
+<option value="Verdana,sans-serif">Verdana</option>
+<option value="Georgia,serif">Georgia</option>
+<option value="'Courier New',monospace">Courier</option>
+<option value="system-ui,sans-serif">System</option>
+</select>
+</div>
+<div class="card">
+<h2>🖼️ Papel de parede</h2>
+<input type="file" id="wallpaperInput" accept="image/*" onchange="setWallpaper(event)">
+<img id="wallpaperPreview" class="preview" style="display:none">
+<button class="secondary" onclick="removeWallpaper()">Remover papel de parede</button>
+</div>
+<div class="card">
+<h2>🔐 PIN de acesso</h2>
+<input id="newPin" type="password" inputmode="numeric" maxlength="8" placeholder="Crie um PIN de 4 a 8 números">
+<button onclick="savePin()">Salvar PIN</button>
+<button class="danger" onclick="removePin()">Remover PIN</button>
+<p class="muted">Proteção local simples; não substitui a segurança do aparelho.</p>
+</div>
+<div class="card">
+<h2>💾 Dados</h2>
+<button class="secondary" onclick="exportData()">Exportar backup</button>
+<button class="danger" onclick="clearAll()">Apagar todos os dados</button>
+</div>
+</section>
+
+<footer class="muted" style="text-align:center;padding:25px">MyTasks Ultimate • Organize, aprenda e planeje.</footer>
+</main>
+
+<nav class="bottom-nav">
+<button class="nav-btn active" data-page="home" onclick="showPage('home')"><b>⌂</b><span>Início</span></button>
+<button class="nav-btn" data-page="tasks" onclick="showPage('tasks')"><b>☷</b><span>Tarefas</span></button>
+<button class="nav-add" onclick="showPage('tasks')">＋</button>
+<button class="nav-btn" data-page="notes" onclick="showPage('notes')"><b>▤</b><span>Notas</span></button>
+<button class="nav-btn" data-page="settings" onclick="showPage('settings')"><b>⚙</b><span>Ajustes</span></button>
+</nav>
+
+<div id="toast"></div>
+<div id="lockScreen">
+<div class="card">
+<h2>🔒 MyTasks bloqueado</h2>
+<p>Digite seu PIN para continuar.</p>
+<input id="unlockPin" type="password" inputmode="numeric" placeholder="PIN">
+<button onclick="unlockApp()">Desbloquear</button>
+<p id="lockError" class="muted"></p>
+</div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const read=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}};
+const write=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+
+let tasks=read('mt_tasks',[]);
+let notes=read('mt_notes',[]);
+let finance=read('mt_finance',[]);
+let travels=read('mt_travels',[]);
+let taskFilter='all';
+let timerSeconds=1500;
+let timerInterval=null;
+let quizQuestions=[],quizIndex=0,quizScore=0;
+
+const money=n=>Number(n||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+
+function esc(s){
+return String(s??'').replace(/[&<>"']/g,c=>({
+'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+}[c]));
+}
+
+function toast(s){
+$('toast').textContent=s;
+$('toast').style.display='block';
+clearTimeout(window.toastTimeout);
+window.toastTimeout=setTimeout(()=>$('toast').style.display='none',2300);
+}
+
+function showPage(id){
+document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===id));
+document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===id));
+if(id==='calendar')renderCalendar();
+if(id==='tasks')renderTasks();
+if(id==='finance')renderFinance();
+if(id==='notes')renderNotes();
+if(id==='travel')renderTravels();
+if(id==='home')renderHome();
+}
+
+function saveAll(){
+write('mt_tasks',tasks);
+write('mt_notes',notes);
+write('mt_finance',finance);
+write('mt_travels',travels);
+renderAll();
+}
+
+function addTask(){
+let name=$('taskName').value.trim();
+if(!name)return toast('Digite o nome da tarefa.');
+tasks.push({
+id:Date.now(),name,date:$('taskDate').value,
+priority:$('taskPriority').value,
+category:$('taskCategory').value.trim(),done:false
+});
+$('taskName').value='';
+$('taskCategory').value='';
+saveAll();
+toast('Tarefa adicionada!');
+}
+
+function filterTasks(f,b){
+taskFilter=f;
+document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('active'));
+b.classList.add('active');
+renderTasks();
+}
+
+function renderTasks(){
+let today=new Date().toISOString().slice(0,10);
+let list=tasks.filter(t=>
+taskFilter==='all'||
+(taskFilter==='pending'&&!t.done)||
+(taskFilter==='done'&&t.done)||
+(taskFilter==='late'&&!t.done&&t.date&&t.date<today)
+);
+$('taskList').innerHTML=list.map(t=>`
+<div class="item ${t.done?'done':''}">
+<div><b>${esc(t.name)}</b><small>${esc(t.category||'Sem categoria')} · ${esc(t.date||'Sem data')} · ${esc(t.priority)}</small></div>
+<div class="item-actions">
+<button class="smallbtn green" onclick="toggleTask(${Number(t.id)})">${t.done?'↩':'✓'}</button>
+<button class="smallbtn danger" onclick="deleteTask(${Number(t.id)})">✕</button>
+</div>
+</div>`).join('')||'<p class="muted">Nenhuma tarefa nesta categoria.</p>';
+}
+
+function toggleTask(id){
+tasks=tasks.map(t=>t.id===id?{...t,done:!t.done}:t);
+saveAll();
+}
+
+function deleteTask(id){
+tasks=tasks.filter(t=>t.id!==id);
+saveAll();
+}
+
+function renderCalendar(){
+let d=$('calendarDate').value||new Date().toISOString().slice(0,10);
+$('calendarTasks').innerHTML='<h2>'+esc(d)+'</h2>'+
+(tasks.filter(t=>t.date===d).map(t=>`
+<div class="item">${esc(t.name)} <span>${t.done?'Concluída':'Pendente'}</span></div>
+`).join('')||'<p class="muted">Nenhuma tarefa para esta data.</p>');
+}
+
+function addNote(){
+let title=$('noteTitle').value.trim();
+let text=$('noteText').value.trim();
+if(!title&&!text)return toast('Escreva alguma coisa.');
+notes.push({id:Date.now(),title,text});
+$('noteTitle').value='';
+$('noteText').value='';
+saveAll();
+toast('Anotação salva!');
+}
+
+function renderNotes(){
+$('noteList').innerHTML=notes.map(n=>`
+<div class="card">
+<h2>${esc(n.title)}</h2>
+<p>${esc(n.text).replace(/\n/g,'<br>')}</p>
+<button class="danger smallbtn" onclick="deleteNote(${Number(n.id)})">Excluir</button>
+</div>`).join('')||'<p class="muted">Nenhuma anotação salva.</p>';
+}
+
+function deleteNote(id){
+notes=notes.filter(n=>n.id!==id);
+saveAll();
+}
+
+function addFinance(){
+let desc=$('financeDescription').value.trim();
+let amount=Number($('financeAmount').value);
+let type=$('financeType').value;
+if(!desc||!Number.isFinite(amount)||amount<=0)return toast('Informe descrição e valor válido.');
+finance.push({id:Date.now(),desc,amount,type,date:new Date().toLocaleDateString('pt-BR')});
+$('financeDescription').value='';
+$('financeAmount').value='';
+saveAll();
+toast('Movimentação salva!');
+}
+
+function renderFinance(){
+let income=finance.filter(x=>x.type==='income').reduce((a,x)=>a+x.amount,0);
+let expense=finance.filter(x=>x.type==='expense').reduce((a,x)=>a+x.amount,0);
+$('incomeTotal').textContent=money(income);
+$('expenseTotal').textContent=money(expense);
+$('balanceTotal').textContent=money(income-expense);
+$('homeBalance').textContent=money(income-expense);
+$('financeList').innerHTML=finance.map(x=>`
+<div class="item">
+<div>${esc(x.desc)}<small>${esc(x.date)}</small></div>
+<b>${x.type==='income'?'+':'−'} ${money(x.amount)}</b>
+<button class="smallbtn danger" onclick="deleteFinance(${Number(x.id)})">✕</button>
+</div>`).join('')||'<p class="muted">Nenhuma movimentação.</p>';
+}
+
+function deleteFinance(id){
+finance=finance.filter(x=>x.id!==id);
+saveAll();
+}
+
+function simulate(){
+let initial=Math.max(0,Number($('simInitial').value)||0);
+let monthly=Math.max(0,Number($('simMonthly').value)||0);
+let rate=(Number($('simRate').value)||0)/100;
+let months=Math.min(600,Math.max(0,Number($('simMonths').value)||0));
+let total=initial;
+for(let i=0;i<months;i++)total=total*(1+rate)+monthly;
+$('simResult').textContent='Resultado hipotético: '+money(total);
+}
+
+function prepareAI(){
+let q=$('aiQuestion').value.trim();
+if(!q)return toast('Digite sua dúvida.');
+$('aiOutput').value=`Ajude-me a estudar ${$('aiSubject').value}. Explique de maneira simples, passo a passo, com exemplos. Minha dúvida ou atividade é: ${q}`;
+}
+
+async function copyText(id){
+try{
+await navigator.clipboard.writeText($(id).value);
+toast('Texto copiado!');
+}catch{
+$(id).select();
+toast('Selecione e copie o texto.');
+}
+}
+
+function showImage(e){
+let f=e.target.files[0];
+if(!f)return;
+if(!f.type.startsWith('image/'))return toast('Selecione uma imagem.');
+let r=new FileReader();
+r.onload=()=>{
+$('cameraPreview').src=r.result;
+$('cameraPreview').style.display='block';
+};
+r.readAsDataURL(f);
+}
+
+function clearImage(){
+$('cameraPreview').src='';
+$('cameraPreview').style.display='none';
+}
+
+function prepareTravel(){
+let from=$('travelFrom').value.trim();
+let to=$('travelTo').value.trim();
+if(!from||!to)return toast('Preencha origem e destino.');
+$('travelOutput').value=`Pesquisa de viagem
+Origem: ${from}
+Destino: ${to}
+Ida: ${$('travelDate').value||'A definir'}
+Volta: ${$('travelReturn').value||'A definir'}
+Passageiros: ${$('travelPeople').value}
+Classe: ${$('travelClass').value}
+
+Compare preços, horários, bagagem e regras com um responsável.`;
+}
+
+function saveTravel(){
+if(!$('travelOutput').value)prepareTravel();
+if(!$('travelOutput').value)return;
+travels.push($('travelOutput').value);
+saveAll();
+toast('Planejamento salvo!');
+}
+
+function renderTravels(){
+$('travelList').innerHTML=travels.map((t,i)=>`
+<div class="item">
+<span>${esc(t.split('\n').slice(0,3).join(' · '))}</span>
+<button class="smallbtn danger" onclick="deleteTravel(${i})">Excluir</button>
+</div>`).join('')||'<p class="muted">Nenhum planejamento salvo.</p>';
+}
+
+function deleteTravel(i){
+travels.splice(i,1);
+saveAll();
+}
+
+function calculate(){
+let a=Number($('calcA').value);
+let b=Number($('calcB').value);
+let op=$('calcOp').value;
+if($('calcA').value===''||$('calcB').value==='')return toast('Preencha os dois números.');
+if(op==='/'&&b===0)return toast('Não é possível dividir por zero.');
+$('calcResult').textContent='Resultado: '+(op==='+'?a+b:op==='-'?a-b:op==='*'?a*b:a/b);
+}
+
+function showTimer(){
+let m=Math.floor(timerSeconds/60),s=timerSeconds%60;
+$('timerDisplay').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+}
+
+function startTimer(){
+if(timerInterval)return;
+timerInterval=setInterval(()=>{
+if(timerSeconds>0){timerSeconds--;showTimer();}
+else{pauseTimer();toast('Tempo encerrado!');}
+},1000);
+}
+
+function pauseTimer(){
+clearInterval(timerInterval);
+timerInterval=null;
+}
+
+function resetTimer(){
+pauseTimer();
+timerSeconds=Math.max(1,Number($('timerMinutes').value)||25)*60;
+showTimer();
+}
+
+const questionBank={
+'Matemática':[
+['Quanto é 8 × 7?',['54','56','64'],1],
+['Resolva: 2x = 18.',['x = 8','x = 9','x = 10'],1],
+['Quanto é 3/4 de 20?',['10','15','18'],1],
+['Quanto é 25 + 17?',['42','43','41'],0],
+['Um ângulo reto mede:',['45°','90°','180°'],1]
+],
+'Português':[
+['Qual palavra é um substantivo?',['Correr','Beleza','Rapidamente'],1],
+['Qual é o plural de cidadão?',['Cidadões','Cidadãos','Cidadães'],1],
+['Qual é um verbo?',['Casa','Bonito','Estudar'],2],
+['Qual sinal encerra uma pergunta?',['?','!','.'],0],
+['Qual palavra é um adjetivo?',['Azul','Mesa','Pular'],0]
+],
+'História':[
+['O Egito Antigo se desenvolveu às margens de qual rio?',['Nilo','Amazonas','Tâmisa'],0],
+['A escrita dos egípcios era chamada:',['Cuneiforme','Hieróglifos','Latim'],1],
+['A Idade Média veio depois da:',['Antiguidade','Idade Moderna','Pré-História'],0],
+['A democracia surgiu na:',['Grécia','China','Rússia'],0]
+],
+'Geografia':[
+['Qual é o maior continente?',['Europa','Ásia','Oceania'],1],
+['Qual é a capital do Brasil?',['São Paulo','Rio de Janeiro','Brasília'],2],
+['O movimento da Terra ao redor do Sol é:',['Rotação','Translação','Inclinação'],1]
+],
+'Ciências':[
+['Qual órgão bombeia o sangue?',['Pulmão','Coração','Estômago'],1],
+['Qual gás as plantas absorvem na fotossíntese?',['Oxigênio','Gás carbônico','Hidrogênio'],1],
+['A água congela a aproximadamente:',['0 °C','50 °C','100 °C'],0]
+],
+'Inglês':[
+['Como se diz casa em inglês?',['House','Book','Water'],0],
+['O passado de go é:',['Goed','Went','Gone'],1],
+['Good morning significa:',['Boa noite','Bom dia','Até logo'],1]
+]
+};
+
+function startQuiz(){
+quizQuestions=questionBank[$('quizSubject').value]||[];
+quizIndex=0;quizScore=0;
+renderQuestion();
+}
+
+function renderQuestion(){
+if(quizIndex>=quizQuestions.length){
+$('quizArea').innerHTML=`<h2>Simulado concluído!</h2><p>Você acertou ${quizScore} de ${quizQuestions.length} questões.</p><button onclick="startQuiz()">Refazer</button>`;
+return;
+}
+let q=quizQuestions[quizIndex];
+$('quizArea').innerHTML=`
+<p class="muted">Questão ${quizIndex+1} de ${quizQuestions.length} · ${esc($('quizGrade').value)}</p>
+<h2>${esc(q[0])}</h2>
+${q[1].map((o,i)=>`<button class="quiz-option" onclick="answerQuiz(${i})">${String.fromCharCode(65+i)}. ${esc(o)}</button>`).join('')}`;
+}
+
+function answerQuiz(i){
+if(i===quizQuestions[quizIndex][2])quizScore++;
+quizIndex++;
+renderQuestion();
+}
+
+function changeAccent(c){
+if(!/^#[0-9a-f]{6}$/i.test(c))return;
+document.documentElement.style.setProperty('--accent',c);
+$('accentPicker').value=c;
+localStorage.setItem('mt_accent',c);
+}
+
+function changeAppearance(mode){
+let light=mode==='light',r=document.documentElement;
+r.style.setProperty('--bg',light?'#eef1f8':'#111022');
+r.style.setProperty('--surface',light?'#fff':'#1b1933');
+r.style.setProperty('--surface2',light?'#fff':'#252243');
+r.style.setProperty('--surface3',light?'#e2e6f0':'#302c52');
+r.style.setProperty('--text',light?'#20243a':'#f7f5ff');
+r.style.setProperty('--muted',light?'#68718a':'#aaa5c6');
+r.style.setProperty('--line',light?'rgba(25,35,60,.12)':'rgba(255,255,255,.09)');
+localStorage.setItem('mt_mode',mode);
+}
+
+function changeFont(f){
+document.documentElement.style.setProperty('--font',f);
+localStorage.setItem('mt_font',f);
+}
+
+function setWallpaper(e){
+let f=e.target.files[0];
+if(!f||!f.type.startsWith('image/'))return toast('Escolha uma imagem.');
+let r=new FileReader();
+r.onload=()=>{
+let img=new Image();
+img.onload=()=>{
+let c=document.createElement('canvas');
+let s=Math.min(1400/img.width,1000/img.height,1);
+c.width=img.width*s;c.height=img.height*s;
+c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+let data=c.toDataURL('image/jpeg',.75);
+try{
+localStorage.setItem('mt_wallpaper',data);
+applyWallpaper(data);
+toast('Papel de parede atualizado!');
+}catch{
+toast('Imagem muito grande. Escolha outra.');
+}
+};
+img.src=r.result;
+};
+r.readAsDataURL(f);
+}
+
+function applyWallpaper(data){
+document.body.style.backgroundImage=data
+?`linear-gradient(#11102288,#11102288),url("${data}")`
+:'radial-gradient(ellipse at 10% 0%,color-mix(in srgb,var(--accent) 15%,transparent),transparent 38%)';
+$('wallpaperPreview').src=data||'';
+$('wallpaperPreview').style.display=data?'block':'none';
+}
+
+function removeWallpaper(){
+localStorage.removeItem('mt_wallpaper');
+applyWallpaper(null);
+$('wallpaperInput').value='';
+toast('Papel de parede removido.');
+}
+
+function savePin(){
+let p=$('newPin').value;
+if(!/^\d{4,8}$/.test(p))return toast('O PIN precisa ter de 4 a 8 números.');
+localStorage.setItem('mt_pin',p);
+$('newPin').value='';
+toast('PIN salvo!');
+}
+
+function removePin(){
+if(confirm('Remover o PIN?')){
+localStorage.removeItem('mt_pin');
+toast('PIN removido.');
+}
+}
+
+function lockNow(){
+if(!localStorage.getItem('mt_pin'))return toast('Configure um PIN primeiro.');
+$('lockScreen').style.display='flex';
+$('unlockPin').value='';
+$('lockError').textContent='';
+}
+
+function unlockApp(){
+if($('unlockPin').value===localStorage.getItem('mt_pin')){
+$('lockScreen').style.display='none';
+}else{
+$('lockError').textContent='PIN incorreto.';
+}
+}
+
+function exportData(){
+let blob=new Blob([JSON.stringify({tasks,notes,finance,travels},null,2)],{type:'application/json'});
+let url=URL.createObjectURL(blob);
+let a=document.createElement('a');
+a.href=url;a.download='mytasks-backup.json';
+a.click();
+setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+
+function clearAll(){
+if(!confirm('Isso apagará tarefas, notas, finanças e viagens. Continuar?'))return;
+tasks=[];notes=[];finance=[];travels=[];
+saveAll();
+toast('Dados apagados.');
+}
+
+function renderHome(){
+let done=tasks.filter(t=>t.done).length;
+$('totalTasks').textContent=tasks.length;
+$('pendingTasks').textContent=tasks.length-done;
+$('completedTasks').textContent=done;
+$('progress').textContent=(tasks.length?Math.round(done/tasks.length*100):0)+'%';
+let upcoming=tasks.filter(t=>!t.done).sort((a,b)=>(a.date||'9999').localeCompare(b.date||'9999')).slice(0,5);
+$('homeUpcoming').innerHTML=upcoming.map(t=>`
+<div class="item">${esc(t.name)} <small>${esc(t.date||'Sem data')}</small></div>
+`).join('')||'<p class="muted">Você não tem tarefas pendentes.</p>';
+}
+
+function renderAll(){
+renderTasks();
+renderNotes();
+renderFinance();
+renderTravels();
+renderHome();
+renderCalendar();
+}
+
+function init(){
+let ac=localStorage.getItem('mt_accent')||'#9b5cff';
+changeAccent(ac);
+let mode=localStorage.getItem('mt_mode')||'dark';
+$('appearance').value=mode;
+changeAppearance(mode);
+let f=localStorage.getItem('mt_font');
+if(f){
+$('fontChoice').value=f;
+changeFont(f);
+}
+applyWallpaper(localStorage.getItem('mt_wallpaper'));
+$('calendarDate').value=new Date().toISOString().slice(0,10);
+renderAll();
+showTimer();
+}
+
+init();
+</script>
+</body>
+</html>
