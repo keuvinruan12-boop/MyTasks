@@ -5,37 +5,56 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#17152b">
+<meta name="description" content="MyTasks Ultimate - Organize sua rotina, estudos e projetos.">
 <title>MyTasks Ultimate</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
 :root{
---bg:#111022;--surface:#1b1933;--surface2:#252243;
---surface3:#302c52;--text:#f7f5ff;--muted:#aaa5c6;
---accent:#9b5cff;--line:rgba(255,255,255,.09);
+--bg:#111022;
+--surface:#1b1933;
+--surface2:#252243;
+--surface3:#302c52;
+--text:#f7f5ff;
+--muted:#aaa5c6;
+--accent:#9b5cff;
+--line:rgba(255,255,255,.09);
 --shadow:0 16px 40px rgba(0,0,0,.22);
---font:Inter,system-ui,Arial,sans-serif
+--font:Inter,system-ui,Arial,sans-serif;
 }
 *{box-sizing:border-box}
 body{
-margin:0;min-height:100vh;padding-bottom:95px;color:var(--text);
-font-family:var(--font);
+margin:0;min-height:100vh;padding-bottom:95px;
+color:var(--text);font-family:var(--font);
 background:radial-gradient(ellipse at 10% 0%,color-mix(in srgb,var(--accent) 15%,transparent),transparent 38%),var(--bg);
-background-attachment:fixed;background-size:cover;background-position:center
+background-attachment:fixed;background-size:cover;background-position:center;
 }
 button,input,select,textarea{font:inherit}
-button{cursor:pointer;border:0;border-radius:13px;padding:11px 15px;font-weight:700;color:white;background:var(--accent);transition:.2s}
-button:hover{filter:brightness(1.12);transform:translateY(-1px)}
-input,select,textarea{
-width:100%;padding:13px;margin:7px 0 14px;border:1px solid var(--line);
-border-radius:12px;background:var(--bg);color:var(--text);outline:none
+button{
+cursor:pointer;border:0;border-radius:13px;padding:11px 15px;
+font-weight:700;color:white;background:var(--accent);
+transition:.2s;
 }
-input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}
+button:hover{filter:brightness(1.12);transform:translateY(-1px)}
+button:disabled{opacity:.5;cursor:not-allowed;transform:none}
+input,select,textarea{
+width:100%;padding:13px;margin:7px 0 14px;
+border:1px solid var(--line);border-radius:12px;
+background:var(--bg);color:var(--text);outline:none;
+}
+input:focus,select:focus,textarea:focus{
+border-color:var(--accent);
+box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent);
+}
 textarea{min-height:95px;resize:vertical}
 label{font-size:12px;color:var(--muted);font-weight:700}
 .topbar{
-height:72px;padding:0 24px;display:flex;align-items:center;
-justify-content:space-between;position:sticky;top:0;z-index:10;
+min-height:72px;padding:0 24px;display:flex;
+align-items:center;justify-content:space-between;
+position:sticky;top:0;z-index:10;
 background:color-mix(in srgb,var(--bg) 90%,transparent);
-backdrop-filter:blur(18px);border-bottom:1px solid var(--line)
+backdrop-filter:blur(18px);border-bottom:1px solid var(--line);
 }
 .logo{font-size:22px;font-weight:900}
 .logo span{color:var(--accent)}
@@ -44,34 +63,45 @@ backdrop-filter:blur(18px);border-bottom:1px solid var(--line)
 .shell{max-width:1250px;margin:auto;padding:26px 28px 40px}
 .page{display:none;animation:fade .2s}
 .page.active{display:block}
-@keyframes fade{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+@keyframes fade{
+from{opacity:0;transform:translateY(5px)}
+to{opacity:1;transform:none}
+}
 h1{font-size:clamp(25px,4vw,34px);margin:4px 0 8px;letter-spacing:-1px}
 h2{font-size:18px;margin:0 0 15px}
 .muted{font-size:13px;line-height:1.6}
 .card{
 background:linear-gradient(145deg,var(--surface2),var(--surface));
 border:1px solid var(--line);border-radius:21px;padding:20px;
-margin:15px 0;box-shadow:var(--shadow)
+margin:15px 0;box-shadow:var(--shadow);
 }
-.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin:20px 0}
-.grid>.card{margin:0}
-.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:750}
-.stat{font-size:29px;font-weight:850;margin-top:9px}
+.grid{
+display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+gap:13px;margin:20px 0;
+}
+.grid>.card{margin:0;min-width:0}
+.eyebrow{
+font-size:11px;text-transform:uppercase;letter-spacing:1px;
+color:var(--muted);font-weight:750;
+}
+.stat{font-size:29px;font-weight:850;margin-top:9px;overflow-wrap:anywhere}
 .hero{
 min-height:160px;
-background:radial-gradient(circle at 90% 10%,color-mix(in srgb,var(--accent) 40%,transparent),transparent 42%),var(--surface2)
+background:radial-gradient(circle at 90% 10%,color-mix(in srgb,var(--accent) 40%,transparent),transparent 42%),var(--surface2);
 }
 .hero .stat{font-size:40px}
 .row{display:flex;gap:10px;flex-wrap:wrap}
 .row>*{flex:1;min-width:130px}
 .item{
-display:flex;justify-content:space-between;align-items:center;gap:12px;
-padding:13px 15px;margin:9px 0;border-radius:15px;
-background:var(--surface2);border:1px solid var(--line)
+display:flex;justify-content:space-between;align-items:center;
+gap:12px;padding:13px 15px;margin:9px 0;
+border-radius:15px;background:var(--surface2);
+border:1px solid var(--line);min-width:0;
 }
+.item>div:first-child{min-width:0;overflow-wrap:anywhere}
 .item.done{opacity:.55;text-decoration:line-through}
 .item small{display:block;font-size:11px;margin-top:4px}
-.item-actions{display:flex;gap:6px}
+.item-actions{display:flex;gap:6px;flex-shrink:0}
 .smallbtn{padding:8px 10px;font-size:12px}
 .secondary{background:var(--surface3)}
 .danger{background:#c34e65}
@@ -82,7 +112,7 @@ background:var(--surface2);border:1px solid var(--line)
 .quick{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
 .quick button{
 background:var(--surface2);border:1px solid var(--line);
-color:var(--text);text-align:left;min-height:70px
+color:var(--text);text-align:left;min-height:70px;
 }
 .quick b{display:block;color:var(--accent);font-size:20px;margin-bottom:7px}
 .bottom-nav{
@@ -91,34 +121,59 @@ transform:translateX(-50%);width:min(620px,calc(100% - 24px));
 height:70px;padding:6px;display:flex;justify-content:space-around;
 align-items:center;background:color-mix(in srgb,var(--surface) 94%,transparent);
 backdrop-filter:blur(20px);border:1px solid var(--line);
-border-radius:22px;box-shadow:0 15px 40px #0005
+border-radius:22px;box-shadow:0 15px 40px #0005;
 }
 .nav-btn{
 height:54px;min-width:48px;padding:5px;background:transparent;
 color:var(--muted);display:flex;flex-direction:column;
-align-items:center;justify-content:center;gap:3px;font-size:10px
+align-items:center;justify-content:center;gap:3px;font-size:10px;
 }
 .nav-btn b{font-size:19px}
-.nav-btn.active{background:color-mix(in srgb,var(--accent) 18%,transparent);color:var(--accent)}
+.nav-btn.active{
+background:color-mix(in srgb,var(--accent) 18%,transparent);
+color:var(--accent);
+}
 .nav-add{
 height:56px;width:56px;border-radius:19px;font-size:27px;
-margin-top:-22px;border:5px solid var(--bg)
+margin-top:-22px;border:5px solid var(--bg);
 }
 .palette{display:flex;gap:10px;flex-wrap:wrap}
-.swatch{width:36px;height:36px;padding:0;border:3px solid #ffffff66;border-radius:50%}
-.preview{max-width:100%;max-height:230px;display:block;margin:12px auto;border-radius:15px}
-.quiz-option{display:block;width:100%;text-align:left;margin:8px 0;background:var(--surface3)}
+.swatch{
+width:36px;height:36px;padding:0;
+border:3px solid #ffffff66;border-radius:50%;
+}
+.preview{
+max-width:100%;max-height:230px;display:block;
+margin:12px auto;border-radius:15px;
+}
+.quiz-option{
+display:block;width:100%;text-align:left;
+margin:8px 0;background:var(--surface3);
+}
 #toast{
-display:none;position:fixed;z-index:40;bottom:100px;left:50%;
-transform:translateX(-50%);background:var(--surface3);
-padding:12px 18px;border:1px solid var(--line);
-border-radius:12px;box-shadow:var(--shadow)
+display:none;position:fixed;z-index:100000;
+bottom:100px;left:50%;transform:translateX(-50%);
+background:var(--surface3);padding:12px 18px;
+border:1px solid var(--line);border-radius:12px;
+box-shadow:var(--shadow);max-width:90%;text-align:center;
 }
-#lockScreen{
-display:none;position:fixed;inset:0;z-index:50;background:#080817ed;
-align-items:center;justify-content:center;padding:20px
+#lockScreen,#loginScreen{
+display:none;position:fixed;inset:0;z-index:99999;
+background:#080817ed;align-items:center;
+justify-content:center;padding:20px;
 }
-#lockScreen .card{width:min(370px,100%);text-align:center}
+#loginScreen{
+z-index:100000;background:#111022;
+}
+#lockScreen .card,#loginScreen .card{
+width:min(390px,100%);text-align:center;
+}
+.auth-logo{font-size:32px;font-weight:900;margin-bottom:8px}
+.auth-logo span{color:var(--accent)}
+.auth-message{font-size:13px;color:var(--muted);margin-top:12px;min-height:20px}
+.auth-btn{width:100%;margin-top:8px}
+.user-info{font-size:11px;color:var(--muted);max-width:150px;overflow:hidden;text-overflow:ellipsis}
+.empty{text-align:center;padding:20px;color:var(--muted)}
 @media(max-width:760px){
 .topbar{height:66px;padding:0 14px}
 .shell{padding:18px 13px 30px}
@@ -128,16 +183,21 @@ align-items:center;justify-content:center;padding:20px
 .hero .stat{font-size:36px}
 .nav-btn{min-width:42px}
 .nav-btn span{font-size:9px}
+.user-info{display:none}
 }
 @media(min-width:761px){
 body{padding-bottom:25px}
-.bottom-nav{left:20px;top:95px;bottom:auto;transform:none;width:76px;height:auto;flex-direction:column;padding:10px}
+.bottom-nav{
+left:20px;top:95px;bottom:auto;transform:none;
+width:76px;height:auto;flex-direction:column;padding:10px;
+}
 .nav-btn{width:54px}
 .nav-add{margin:8px 0}
 .shell{padding-left:125px}
 }
 </style>
 </head>
+
 <body>
 
 <header class="topbar">
@@ -145,7 +205,11 @@ body{padding-bottom:25px}
 <div class="logo">My<span>Tasks</span> Ultimate</div>
 <div class="sub">Organize sua rotina com inteligência</div>
 </div>
-<button class="secondary" onclick="lockNow()">🔒 Bloquear</button>
+<div class="row" style="flex:0;align-items:center;justify-content:flex-end">
+<span class="user-info" id="userEmail"></span>
+<button class="secondary smallbtn" onclick="lockNow()">🔒 Bloquear</button>
+<button class="danger smallbtn" onclick="logoutMyTasks()">Sair</button>
+</div>
 </header>
 
 <main class="shell">
@@ -153,17 +217,20 @@ body{padding-bottom:25px}
 <section id="home" class="page active">
 <h1>Bem-vindo ao MyTasks 👋</h1>
 <p class="muted">Seu espaço para organizar estudos, tarefas e projetos.</p>
+
 <div class="card hero">
 <div class="eyebrow">Seu progresso</div>
 <div class="stat" id="progress">0%</div>
 <div class="muted">das tarefas concluídas</div>
 </div>
+
 <div class="grid">
 <div class="card"><div class="eyebrow">Tarefas totais</div><div class="stat" id="totalTasks">0</div></div>
 <div class="card"><div class="eyebrow">Pendentes</div><div class="stat" id="pendingTasks">0</div></div>
 <div class="card"><div class="eyebrow">Concluídas</div><div class="stat" id="completedTasks">0</div></div>
 <div class="card"><div class="eyebrow">Saldo financeiro</div><div class="stat" id="homeBalance">R$ 0,00</div></div>
 </div>
+
 <div class="card">
 <h2>⚡ Acesso rápido</h2>
 <div class="quick">
@@ -180,12 +247,15 @@ body{padding-bottom:25px}
 <h1>📋 Gerenciador de tarefas</h1>
 <div class="card">
 <h2>Adicionar tarefa</h2>
-<input id="taskName" placeholder="Nome da tarefa">
+<input id="taskName" maxlength="150" placeholder="Nome da tarefa">
 <div class="row">
 <div><label>Data</label><input type="date" id="taskDate"></div>
-<div><label>Prioridade</label><select id="taskPriority"><option>Normal</option><option>Alta</option><option>Baixa</option></select></div>
+<div><label>Prioridade</label>
+<select id="taskPriority">
+<option>Normal</option><option>Alta</option><option>Baixa</option>
+</select></div>
 </div>
-<input id="taskCategory" placeholder="Categoria (escola, pessoal...)">
+<input id="taskCategory" maxlength="60" placeholder="Categoria (escola, pessoal...)">
 <button onclick="addTask()">Adicionar tarefa</button>
 </div>
 <div class="tabs">
@@ -209,8 +279,8 @@ body{padding-bottom:25px}
 <section id="notes" class="page">
 <h1>📝 Anotações</h1>
 <div class="card">
-<input id="noteTitle" placeholder="Título">
-<textarea id="noteText" placeholder="Escreva sua anotação..."></textarea>
+<input id="noteTitle" maxlength="120" placeholder="Título">
+<textarea id="noteText" maxlength="10000" placeholder="Escreva sua anotação..."></textarea>
 <button onclick="addNote()">Salvar anotação</button>
 </div>
 <div id="noteList"></div>
@@ -225,9 +295,12 @@ body{padding-bottom:25px}
 </div>
 <div class="card">
 <h2>Adicionar movimentação</h2>
-<input id="financeDescription" placeholder="Descrição">
-<input id="financeAmount" type="number" min="0" step="0.01" placeholder="Valor em R$">
-<select id="financeType"><option value="income">Entrada</option><option value="expense">Despesa</option></select>
+<input id="financeDescription" maxlength="120" placeholder="Descrição">
+<input id="financeAmount" type="number" min="0.01" step="0.01" placeholder="Valor em R$">
+<select id="financeType">
+<option value="income">Entrada</option>
+<option value="expense">Despesa</option>
+</select>
 <button onclick="addFinance()">Salvar movimentação</button>
 </div>
 <div class="card"><h2>Histórico</h2><div id="financeList"></div></div>
@@ -242,7 +315,7 @@ body{padding-bottom:25px}
 <p><b>Renda variável:</b> investimentos cujo valor pode subir ou cair.</p>
 <p><b>Diversificação:</b> distribuir recursos para não depender de um único investimento.</p>
 <p><b>Juros compostos:</b> juros calculados também sobre rendimentos anteriores.</p>
-<p class="muted">Conteúdo educativo. Simulações não garantem resultados.</p>
+<p class="muted">Conteúdo educativo. Simulações não garantem resultados. Decisões financeiras reais devem ser conversadas com um responsável.</p>
 </div>
 <div class="card">
 <h2>Simulador educativo de juros compostos</h2>
@@ -251,7 +324,7 @@ body{padding-bottom:25px}
 <div><label>Depósito mensal (R$)</label><input id="simMonthly" type="number" min="0" value="20"></div>
 </div>
 <div class="row">
-<div><label>Taxa mensal hipotética (%)</label><input id="simRate" type="number" step=".1" value="0.5"></div>
+<div><label>Taxa mensal hipotética (%)</label><input id="simRate" type="number" min="0" step=".1" value="0.5"></div>
 <div><label>Tempo (meses)</label><input id="simMonths" type="number" min="0" max="600" value="12"></div>
 </div>
 <button onclick="simulate()">Calcular simulação</button>
@@ -263,7 +336,7 @@ body{padding-bottom:25px}
 <h1>🎓 Central de estudos e ajuda com IA</h1>
 <div class="card">
 <h2>Assistente de estudos</h2>
-<p class="muted">Prepare uma pergunta para usar em uma ferramenta de IA. Não há conexão automática com serviço externo.</p>
+<p class="muted">Organize uma pergunta para usar em uma ferramenta de IA. Esta área não possui conexão automática com um serviço externo.</p>
 <select id="aiSubject">
 <option>Matemática</option><option>Português</option><option>História</option><option>Geografia</option><option>Ciências</option><option>Inglês</option>
 </select>
@@ -295,8 +368,8 @@ body{padding-bottom:25px}
 <h1>📷 Câmera e imagens</h1>
 <div class="card">
 <p>Fotografe uma atividade ou selecione uma imagem da galeria.</p>
-<input type="file" accept="image/*" capture="environment" onchange="showImage(event)">
-<img id="cameraPreview" class="preview" alt="Prévia" style="display:none">
+<input type="file" id="cameraInput" accept="image/*" capture="environment" onchange="showImage(event)">
+<img id="cameraPreview" class="preview" alt="Prévia da imagem" style="display:none">
 <button class="secondary" onclick="clearImage()">Limpar imagem</button>
 <p class="muted">O reconhecimento automático depende de uma ferramenta de IA conectada.</p>
 </div>
@@ -312,8 +385,11 @@ body{padding-bottom:25px}
 <div><label>Volta</label><input id="travelReturn" type="date"></div>
 </div>
 <div class="row">
-<div><label>Passageiros</label><input id="travelPeople" type="number" min="1" value="1"></div>
-<div><label>Classe</label><select id="travelClass"><option>Econômica</option><option>Executiva</option><option>Primeira classe</option></select></div>
+<div><label>Passageiros</label><input id="travelPeople" type="number" min="1" max="20" value="1"></div>
+<div><label>Classe</label>
+<select id="travelClass">
+<option>Econômica</option><option>Executiva</option><option>Primeira classe</option>
+</select></div>
 </div>
 <button onclick="prepareTravel()">Preparar pesquisa</button>
 <textarea id="travelOutput" placeholder="Sua pesquisa será organizada aqui."></textarea>
@@ -329,7 +405,9 @@ body{padding-bottom:25px}
 <h2>Calculadora</h2>
 <div class="row">
 <input id="calcA" type="number" placeholder="Primeiro número">
-<select id="calcOp"><option value="+">+</option><option value="-">−</option><option value="*">×</option><option value="/">÷</option></select>
+<select id="calcOp">
+<option value="+">+</option><option value="-">−</option><option value="*">×</option><option value="/">÷</option>
+</select>
 <input id="calcB" type="number" placeholder="Segundo número">
 </div>
 <button onclick="calculate()">Calcular</button>
@@ -338,7 +416,7 @@ body{padding-bottom:25px}
 <div class="card">
 <h2>⏱️ Temporizador</h2>
 <div class="row">
-<input id="timerMinutes" type="number" value="25" min="1">
+<input id="timerMinutes" type="number" value="25" min="1" max="600">
 <button onclick="startTimer()">Iniciar</button>
 <button class="secondary" onclick="pauseTimer()">Pausar</button>
 <button class="danger" onclick="resetTimer()">Zerar</button>
@@ -351,7 +429,7 @@ body{padding-bottom:25px}
 <h1>⚙️ Configurações</h1>
 <div class="card">
 <h2>🎨 Personalizar cores</h2>
-<p class="muted">Escolha uma cor de destaque sem mudar o estilo da interface.</p>
+<p class="muted">Escolha uma cor de destaque sem mudar as cores dos botões de forma independente.</p>
 <div class="palette">
 <button class="swatch" style="background:#9b5cff" onclick="changeAccent('#9b5cff')"></button>
 <button class="swatch" style="background:#287cf0" onclick="changeAccent('#287cf0')"></button>
@@ -364,12 +442,14 @@ body{padding-bottom:25px}
 <label>Cor personalizada</label>
 <input type="color" id="accentPicker" value="#9b5cff" onchange="changeAccent(this.value)">
 </div>
+
 <div class="card">
 <h2>Modo de aparência</h2>
 <select id="appearance" onchange="changeAppearance(this.value)">
 <option value="dark">Escuro</option><option value="light">Claro</option>
 </select>
 </div>
+
 <div class="card">
 <h2>🔤 Tipo de fonte</h2>
 <select id="fontChoice" onchange="changeFont(this.value)">
@@ -380,12 +460,14 @@ body{padding-bottom:25px}
 <option value="system-ui,sans-serif">System</option>
 </select>
 </div>
+
 <div class="card">
 <h2>🖼️ Papel de parede</h2>
 <input type="file" id="wallpaperInput" accept="image/*" onchange="setWallpaper(event)">
-<img id="wallpaperPreview" class="preview" style="display:none">
+<img id="wallpaperPreview" class="preview" alt="Prévia do papel de parede" style="display:none">
 <button class="secondary" onclick="removeWallpaper()">Remover papel de parede</button>
 </div>
+
 <div class="card">
 <h2>🔐 PIN de acesso</h2>
 <input id="newPin" type="password" inputmode="numeric" maxlength="8" placeholder="Crie um PIN de 4 a 8 números">
@@ -393,14 +475,19 @@ body{padding-bottom:25px}
 <button class="danger" onclick="removePin()">Remover PIN</button>
 <p class="muted">Proteção local simples; não substitui a segurança do aparelho.</p>
 </div>
+
 <div class="card">
 <h2>💾 Dados</h2>
 <button class="secondary" onclick="exportData()">Exportar backup</button>
+<button class="secondary" onclick="importData()">Importar backup</button>
+<input type="file" id="backupInput" accept=".json,application/json" hidden onchange="handleImport(event)">
 <button class="danger" onclick="clearAll()">Apagar todos os dados</button>
 </div>
 </section>
 
-<footer class="muted" style="text-align:center;padding:25px">MyTasks Ultimate • Organize, aprenda e planeje.</footer>
+<footer class="muted" style="text-align:center;padding:25px">
+MyTasks Ultimate • Organize, aprenda e planeje.
+</footer>
 </main>
 
 <nav class="bottom-nav">
@@ -411,473 +498,942 @@ body{padding-bottom:25px}
 <button class="nav-btn" data-page="settings" onclick="showPage('settings')"><b>⚙</b><span>Ajustes</span></button>
 </nav>
 
-<div id="toast"></div>
+<div id="toast" role="status" aria-live="polite"></div>
+
 <div id="lockScreen">
 <div class="card">
 <h2>🔒 MyTasks bloqueado</h2>
 <p>Digite seu PIN para continuar.</p>
-<input id="unlockPin" type="password" inputmode="numeric" placeholder="PIN">
+<input id="unlockPin" type="password" inputmode="numeric" maxlength="8" placeholder="PIN">
 <button onclick="unlockApp()">Desbloquear</button>
 <p id="lockError" class="muted"></p>
 </div>
 </div>
 
+<div id="loginScreen">
+<div class="card">
+<div class="auth-logo">My<span>Tasks</span></div>
+<h2>Acesse sua conta</h2>
+<p class="muted">Entre ou crie sua conta para continuar.</p>
+
+<input type="email" id="authEmail" placeholder="Seu e-mail" autocomplete="email">
+<input type="password" id="authPassword" placeholder="Sua senha" autocomplete="current-password">
+
+<button class="auth-btn" id="loginButton" onclick="loginMyTasks()">Entrar</button>
+<button class="auth-btn secondary" id="registerButton" onclick="registerMyTasks()">Criar minha conta</button>
+<div id="authMessage" class="auth-message" role="status" aria-live="polite"></div>
+</div>
+</div>
+
 <script>
-const $=id=>document.getElementById(id);
-const read=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}};
-const write=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+/* ==========================================
+   CONFIGURAÇÃO SUPABASE
+   Insira os dados do seu projeto.
+========================================== */
 
-let tasks=read('mt_tasks',[]);
-let notes=read('mt_notes',[]);
-let finance=read('mt_finance',[]);
-let travels=read('mt_travels',[]);
-let taskFilter='all';
-let timerSeconds=1500;
-let timerInterval=null;
-let quizQuestions=[],quizIndex=0,quizScore=0;
+const SUPABASE_URL = "COLOQUE_SUA_PROJECT_URL";
+const SUPABASE_ANON_KEY = "COLOQUE_SUA_ANON_KEY";
 
-const money=n=>Number(n||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+let myTasksSupabase = null;
+let currentUser = null;
+let appInitialized = false;
+let storagePrefix = "mytasks_guest_";
 
-function esc(s){
-return String(s??'').replace(/[&<>"']/g,c=>({
-'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+/* ==========================================
+   FUNÇÕES BÁSICAS
+========================================== */
+
+const $ = id => document.getElementById(id);
+
+const money = n => Number(n || 0).toLocaleString("pt-BR", {
+style:"currency",
+currency:"BRL"
+});
+
+function localDate(){
+const d = new Date();
+const year = d.getFullYear();
+const month = String(d.getMonth()+1).padStart(2,"0");
+const day = String(d.getDate()).padStart(2,"0");
+return `${year}-${month}-${day}`;
+}
+
+function read(key, fallback){
+try{
+const value = localStorage.getItem(storagePrefix + key);
+return value === null ? fallback : JSON.parse(value);
+}catch(error){
+console.error("Erro ao ler dados:",error);
+return fallback;
+}
+}
+
+function write(key,value){
+try{
+localStorage.setItem(storagePrefix + key,JSON.stringify(value));
+return true;
+}catch(error){
+console.error("Erro ao salvar:",error);
+toast("Não foi possível salvar. Verifique o espaço disponível.");
+return false;
+}
+}
+
+function esc(value){
+return String(value ?? "").replace(/[&<>"']/g,c=>({
+"&":"&amp;",
+"<":"&lt;",
+">":"&gt;",
+'"':"&quot;",
+"'":"&#39;"
 }[c]));
 }
 
-function toast(s){
-$('toast').textContent=s;
-$('toast').style.display='block';
+function toast(message){
+$("toast").textContent = message;
+$("toast").style.display = "block";
 clearTimeout(window.toastTimeout);
-window.toastTimeout=setTimeout(()=>$('toast').style.display='none',2300);
+window.toastTimeout = setTimeout(()=>{
+$("toast").style.display = "none";
+},2500);
 }
 
-function showPage(id){
-document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===id));
-document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.page===id));
-if(id==='calendar')renderCalendar();
-if(id==='tasks')renderTasks();
-if(id==='finance')renderFinance();
-if(id==='notes')renderNotes();
-if(id==='travel')renderTravels();
-if(id==='home')renderHome();
+/* ==========================================
+   DADOS DO APLICATIVO
+========================================== */
+
+let tasks = [];
+let notes = [];
+let finance = [];
+let travels = [];
+
+let taskFilter = "all";
+let timerSeconds = 1500;
+let timerInterval = null;
+
+let quizQuestions = [];
+let quizIndex = 0;
+let quizScore = 0;
+
+/* ==========================================
+   ARMAZENAMENTO
+========================================== */
+
+function loadData(){
+tasks = read("tasks",[]);
+notes = read("notes",[]);
+finance = read("finance",[]);
+travels = read("travels",[]);
 }
 
 function saveAll(){
-write('mt_tasks',tasks);
-write('mt_notes',notes);
-write('mt_finance',finance);
-write('mt_travels',travels);
+const ok = [
+write("tasks",tasks),
+write("notes",notes),
+write("finance",finance),
+write("travels",travels)
+].every(Boolean);
+
 renderAll();
+return ok;
 }
+
+/* ==========================================
+   NAVEGAÇÃO
+========================================== */
+
+function showPage(id){
+const page = $(id);
+if(!page)return;
+
+document.querySelectorAll(".page").forEach(p=>{
+p.classList.toggle("active",p.id===id);
+});
+
+document.querySelectorAll(".nav-btn").forEach(b=>{
+b.classList.toggle("active",b.dataset.page===id);
+});
+
+if(id==="calendar")renderCalendar();
+if(id==="tasks")renderTasks();
+if(id==="finance")renderFinance();
+if(id==="notes")renderNotes();
+if(id==="travel")renderTravels();
+if(id==="home")renderHome();
+}
+
+/* ==========================================
+   TAREFAS
+========================================== */
 
 function addTask(){
-let name=$('taskName').value.trim();
-if(!name)return toast('Digite o nome da tarefa.');
+const name = $("taskName").value.trim();
+
+if(!name)return toast("Digite o nome da tarefa.");
+
 tasks.push({
-id:Date.now(),name,date:$('taskDate').value,
-priority:$('taskPriority').value,
-category:$('taskCategory').value.trim(),done:false
+id:Date.now(),
+name,
+date:$("taskDate").value,
+priority:$("taskPriority").value,
+category:$("taskCategory").value.trim(),
+done:false
 });
-$('taskName').value='';
-$('taskCategory').value='';
+
+$("taskName").value = "";
+$("taskCategory").value = "";
+$("taskDate").value = "";
+
 saveAll();
-toast('Tarefa adicionada!');
+toast("Tarefa adicionada!");
 }
 
-function filterTasks(f,b){
-taskFilter=f;
-document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('active'));
-b.classList.add('active');
+function filterTasks(filter,button){
+taskFilter = filter;
+
+document.querySelectorAll(".tabs button").forEach(b=>{
+b.classList.remove("active");
+});
+
+button.classList.add("active");
 renderTasks();
 }
 
 function renderTasks(){
-let today=new Date().toISOString().slice(0,10);
-let list=tasks.filter(t=>
-taskFilter==='all'||
-(taskFilter==='pending'&&!t.done)||
-(taskFilter==='done'&&t.done)||
-(taskFilter==='late'&&!t.done&&t.date&&t.date<today)
-);
-$('taskList').innerHTML=list.map(t=>`
-<div class="item ${t.done?'done':''}">
-<div><b>${esc(t.name)}</b><small>${esc(t.category||'Sem categoria')} · ${esc(t.date||'Sem data')} · ${esc(t.priority)}</small></div>
+const today = localDate();
+
+const list = tasks.filter(t=>{
+if(taskFilter==="pending")return !t.done;
+if(taskFilter==="done")return t.done;
+if(taskFilter==="late")return !t.done && t.date && t.date<today;
+return true;
+});
+
+$("taskList").innerHTML = list.map(t=>`
+<div class="item ${t.done?"done":""}">
+<div>
+<b>${esc(t.name)}</b>
+<small>${esc(t.category||"Sem categoria")} · ${esc(t.date||"Sem data")} · ${esc(t.priority)}</small>
+</div>
 <div class="item-actions">
-<button class="smallbtn green" onclick="toggleTask(${Number(t.id)})">${t.done?'↩':'✓'}</button>
+<button class="smallbtn green" onclick="toggleTask(${Number(t.id)})">${t.done?"↩":"✓"}</button>
 <button class="smallbtn danger" onclick="deleteTask(${Number(t.id)})">✕</button>
 </div>
-</div>`).join('')||'<p class="muted">Nenhuma tarefa nesta categoria.</p>';
+</div>
+`).join("") || '<p class="empty">Nenhuma tarefa nesta categoria.</p>';
 }
 
 function toggleTask(id){
-tasks=tasks.map(t=>t.id===id?{...t,done:!t.done}:t);
+tasks = tasks.map(t=>t.id===id?{...t,done:!t.done}:t);
 saveAll();
 }
 
 function deleteTask(id){
-tasks=tasks.filter(t=>t.id!==id);
+tasks = tasks.filter(t=>t.id!==id);
 saveAll();
+toast("Tarefa excluída.");
 }
+
+/* ==========================================
+   CALENDÁRIO
+========================================== */
 
 function renderCalendar(){
-let d=$('calendarDate').value||new Date().toISOString().slice(0,10);
-$('calendarTasks').innerHTML='<h2>'+esc(d)+'</h2>'+
-(tasks.filter(t=>t.date===d).map(t=>`
-<div class="item">${esc(t.name)} <span>${t.done?'Concluída':'Pendente'}</span></div>
-`).join('')||'<p class="muted">Nenhuma tarefa para esta data.</p>');
+const date = $("calendarDate").value || localDate();
+
+const selected = tasks.filter(t=>t.date===date);
+
+$("calendarTasks").innerHTML = `
+<h2>${esc(date)}</h2>
+${selected.map(t=>`
+<div class="item">
+<div><b>${esc(t.name)}</b></div>
+<span>${t.done?"Concluída":"Pendente"}</span>
+</div>
+`).join("") || '<p class="empty">Nenhuma tarefa para esta data.</p>'}
+`;
 }
 
+/* ==========================================
+   ANOTAÇÕES
+========================================== */
+
 function addNote(){
-let title=$('noteTitle').value.trim();
-let text=$('noteText').value.trim();
-if(!title&&!text)return toast('Escreva alguma coisa.');
-notes.push({id:Date.now(),title,text});
-$('noteTitle').value='';
-$('noteText').value='';
+const title = $("noteTitle").value.trim();
+const text = $("noteText").value.trim();
+
+if(!title&&!text)return toast("Escreva alguma coisa.");
+
+notes.push({
+id:Date.now(),
+title,
+text,
+date:new Date().toLocaleDateString("pt-BR")
+});
+
+$("noteTitle").value = "";
+$("noteText").value = "";
+
 saveAll();
-toast('Anotação salva!');
+toast("Anotação salva!");
 }
 
 function renderNotes(){
-$('noteList').innerHTML=notes.map(n=>`
+$("noteList").innerHTML = notes.map(n=>`
 <div class="card">
-<h2>${esc(n.title)}</h2>
-<p>${esc(n.text).replace(/\n/g,'<br>')}</p>
+<h2>${esc(n.title||"Sem título")}</h2>
+<small>${esc(n.date||"")}</small>
+<p>${esc(n.text).replace(/\n/g,"<br>")}</p>
 <button class="danger smallbtn" onclick="deleteNote(${Number(n.id)})">Excluir</button>
-</div>`).join('')||'<p class="muted">Nenhuma anotação salva.</p>';
+</div>
+`).join("") || '<p class="empty">Nenhuma anotação salva.</p>';
 }
 
 function deleteNote(id){
-notes=notes.filter(n=>n.id!==id);
+notes = notes.filter(n=>n.id!==id);
 saveAll();
+toast("Anotação excluída.");
 }
 
+/* ==========================================
+   FINANÇAS
+========================================== */
+
 function addFinance(){
-let desc=$('financeDescription').value.trim();
-let amount=Number($('financeAmount').value);
-let type=$('financeType').value;
-if(!desc||!Number.isFinite(amount)||amount<=0)return toast('Informe descrição e valor válido.');
-finance.push({id:Date.now(),desc,amount,type,date:new Date().toLocaleDateString('pt-BR')});
-$('financeDescription').value='';
-$('financeAmount').value='';
+const desc = $("financeDescription").value.trim();
+const amount = Number($("financeAmount").value);
+const type = $("financeType").value;
+
+if(!desc || !Number.isFinite(amount) || amount<=0){
+return toast("Informe descrição e valor válido.");
+}
+
+finance.push({
+id:Date.now(),
+desc,
+amount,
+type,
+date:new Date().toLocaleDateString("pt-BR")
+});
+
+$("financeDescription").value = "";
+$("financeAmount").value = "";
+
 saveAll();
-toast('Movimentação salva!');
+toast("Movimentação salva!");
 }
 
 function renderFinance(){
-let income=finance.filter(x=>x.type==='income').reduce((a,x)=>a+x.amount,0);
-let expense=finance.filter(x=>x.type==='expense').reduce((a,x)=>a+x.amount,0);
-$('incomeTotal').textContent=money(income);
-$('expenseTotal').textContent=money(expense);
-$('balanceTotal').textContent=money(income-expense);
-$('homeBalance').textContent=money(income-expense);
-$('financeList').innerHTML=finance.map(x=>`
+const income = finance
+.filter(x=>x.type==="income")
+.reduce((a,x)=>a+Number(x.amount),0);
+
+const expense = finance
+.filter(x=>x.type==="expense")
+.reduce((a,x)=>a+Number(x.amount),0);
+
+const balance = income-expense;
+
+$("incomeTotal").textContent = money(income);
+$("expenseTotal").textContent = money(expense);
+$("balanceTotal").textContent = money(balance);
+$("homeBalance").textContent = money(balance);
+
+$("financeList").innerHTML = finance.map(x=>`
 <div class="item">
-<div>${esc(x.desc)}<small>${esc(x.date)}</small></div>
-<b>${x.type==='income'?'+':'−'} ${money(x.amount)}</b>
+<div>
+<b>${esc(x.desc)}</b>
+<small>${esc(x.date)}</small>
+</div>
+<b>${x.type==="income"?"+":"−"} ${money(x.amount)}</b>
 <button class="smallbtn danger" onclick="deleteFinance(${Number(x.id)})">✕</button>
-</div>`).join('')||'<p class="muted">Nenhuma movimentação.</p>';
+</div>
+`).join("") || '<p class="empty">Nenhuma movimentação.</p>';
 }
 
 function deleteFinance(id){
-finance=finance.filter(x=>x.id!==id);
+finance = finance.filter(x=>x.id!==id);
 saveAll();
+toast("Movimentação excluída.");
 }
+
+/* ==========================================
+   SIMULADOR DE JUROS
+========================================== */
 
 function simulate(){
-let initial=Math.max(0,Number($('simInitial').value)||0);
-let monthly=Math.max(0,Number($('simMonthly').value)||0);
-let rate=(Number($('simRate').value)||0)/100;
-let months=Math.min(600,Math.max(0,Number($('simMonths').value)||0));
-let total=initial;
-for(let i=0;i<months;i++)total=total*(1+rate)+monthly;
-$('simResult').textContent='Resultado hipotético: '+money(total);
+const initial = Math.max(0,Number($("simInitial").value)||0);
+const monthly = Math.max(0,Number($("simMonthly").value)||0);
+const rate = Math.max(0,Number($("simRate").value)||0)/100;
+const months = Math.min(600,Math.max(0,Number($("simMonths").value)||0));
+
+let total = initial;
+
+for(let i=0;i<months;i++){
+total = total*(1+rate)+monthly;
 }
 
+$("simResult").textContent = "Resultado hipotético: "+money(total);
+}
+
+/* ==========================================
+   ASSISTENTE DE ESTUDOS
+========================================== */
+
 function prepareAI(){
-let q=$('aiQuestion').value.trim();
-if(!q)return toast('Digite sua dúvida.');
-$('aiOutput').value=`Ajude-me a estudar ${$('aiSubject').value}. Explique de maneira simples, passo a passo, com exemplos. Minha dúvida ou atividade é: ${q}`;
+const question = $("aiQuestion").value.trim();
+
+if(!question)return toast("Digite sua dúvida.");
+
+$("aiOutput").value =
+`Ajude-me a estudar ${$("aiSubject").value}.
+
+Explique de maneira simples, passo a passo, com exemplos.
+
+Minha dúvida ou atividade é:
+${question}`;
 }
 
 async function copyText(id){
+const element = $(id);
+if(!element.value)return toast("Não há texto para copiar.");
+
 try{
-await navigator.clipboard.writeText($(id).value);
-toast('Texto copiado!');
-}catch{
-$(id).select();
-toast('Selecione e copie o texto.');
+await navigator.clipboard.writeText(element.value);
+toast("Texto copiado!");
+}catch(error){
+element.select();
+toast("Selecione o texto e copie manualmente.");
 }
 }
 
-function showImage(e){
-let f=e.target.files[0];
-if(!f)return;
-if(!f.type.startsWith('image/'))return toast('Selecione uma imagem.');
-let r=new FileReader();
-r.onload=()=>{
-$('cameraPreview').src=r.result;
-$('cameraPreview').style.display='block';
+/* ==========================================
+   CÂMERA E IMAGENS
+========================================== */
+
+function showImage(event){
+const file = event.target.files?.[0];
+if(!file)return;
+
+if(!file.type.startsWith("image/")){
+return toast("Selecione uma imagem válida.");
+}
+
+if(file.size>12*1024*1024){
+return toast("A imagem é muito grande.");
+}
+
+const reader = new FileReader();
+
+reader.onload = ()=>{
+$("cameraPreview").src = reader.result;
+$("cameraPreview").style.display = "block";
 };
-r.readAsDataURL(f);
+
+reader.onerror = ()=>toast("Não foi possível abrir a imagem.");
+
+reader.readAsDataURL(file);
 }
 
 function clearImage(){
-$('cameraPreview').src='';
-$('cameraPreview').style.display='none';
+$("cameraPreview").src = "";
+$("cameraPreview").style.display = "none";
+$("cameraInput").value = "";
 }
 
+/* ==========================================
+   PLANEJADOR DE VIAGENS
+========================================== */
+
 function prepareTravel(){
-let from=$('travelFrom').value.trim();
-let to=$('travelTo').value.trim();
-if(!from||!to)return toast('Preencha origem e destino.');
-$('travelOutput').value=`Pesquisa de viagem
+const from = $("travelFrom").value.trim();
+const to = $("travelTo").value.trim();
+
+if(!from||!to)return toast("Preencha origem e destino.");
+
+const people = Math.max(1,Math.min(20,Number($("travelPeople").value)||1));
+
+$("travelOutput").value =
+`PESQUISA DE VIAGEM
+
 Origem: ${from}
 Destino: ${to}
-Ida: ${$('travelDate').value||'A definir'}
-Volta: ${$('travelReturn').value||'A definir'}
-Passageiros: ${$('travelPeople').value}
-Classe: ${$('travelClass').value}
+Ida: ${$("travelDate").value||"A definir"}
+Volta: ${$("travelReturn").value||"A definir"}
+Passageiros: ${people}
+Classe: ${$("travelClass").value}
 
 Compare preços, horários, bagagem e regras com um responsável.`;
 }
 
 function saveTravel(){
-if(!$('travelOutput').value)prepareTravel();
-if(!$('travelOutput').value)return;
-travels.push($('travelOutput').value);
+if(!$("travelOutput").value.trim())prepareTravel();
+
+const value = $("travelOutput").value.trim();
+if(!value)return;
+
+travels.push({
+id:Date.now(),
+content:value
+});
+
 saveAll();
-toast('Planejamento salvo!');
+toast("Planejamento salvo!");
 }
 
 function renderTravels(){
-$('travelList').innerHTML=travels.map((t,i)=>`
+$("travelList").innerHTML = travels.map(t=>`
 <div class="item">
-<span>${esc(t.split('\n').slice(0,3).join(' · '))}</span>
-<button class="smallbtn danger" onclick="deleteTravel(${i})">Excluir</button>
-</div>`).join('')||'<p class="muted">Nenhum planejamento salvo.</p>';
+<div>${esc(t.content.split("\n").slice(0,3).join(" · "))}</div>
+<button class="smallbtn danger" onclick="deleteTravel(${Number(t.id)})">Excluir</button>
+</div>
+`).join("") || '<p class="empty">Nenhum planejamento salvo.</p>';
 }
 
-function deleteTravel(i){
-travels.splice(i,1);
+function deleteTravel(id){
+travels = travels.filter(t=>t.id!==id);
 saveAll();
+toast("Planejamento excluído.");
 }
+
+/* ==========================================
+   CALCULADORA
+========================================== */
 
 function calculate(){
-let a=Number($('calcA').value);
-let b=Number($('calcB').value);
-let op=$('calcOp').value;
-if($('calcA').value===''||$('calcB').value==='')return toast('Preencha os dois números.');
-if(op==='/'&&b===0)return toast('Não é possível dividir por zero.');
-$('calcResult').textContent='Resultado: '+(op==='+'?a+b:op==='-'?a-b:op==='*'?a*b:a/b);
+const a = Number($("calcA").value);
+const b = Number($("calcB").value);
+const op = $("calcOp").value;
+
+if($("calcA").value===""||$("calcB").value===""){
+return toast("Preencha os dois números.");
 }
 
+if(op==="/"&&b===0){
+return toast("Não é possível dividir por zero.");
+}
+
+let result;
+
+switch(op){
+case "+":result=a+b;break;
+case "-":result=a-b;break;
+case "*":result=a*b;break;
+case "/":result=a/b;break;
+}
+
+$("calcResult").textContent =
+"Resultado: "+(Number.isFinite(result)?result:"Valor inválido");
+}
+
+/* ==========================================
+   TEMPORIZADOR
+========================================== */
+
 function showTimer(){
-let m=Math.floor(timerSeconds/60),s=timerSeconds%60;
-$('timerDisplay').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+const minutes = Math.floor(timerSeconds/60);
+const seconds = timerSeconds%60;
+
+$("timerDisplay").textContent =
+String(minutes).padStart(2,"0")+":"+
+String(seconds).padStart(2,"0");
 }
 
 function startTimer(){
 if(timerInterval)return;
-timerInterval=setInterval(()=>{
-if(timerSeconds>0){timerSeconds--;showTimer();}
-else{pauseTimer();toast('Tempo encerrado!');}
+
+if(timerSeconds<=0)resetTimer();
+
+timerInterval = setInterval(()=>{
+if(timerSeconds>0){
+timerSeconds--;
+showTimer();
+}else{
+pauseTimer();
+toast("Tempo encerrado!");
+}
 },1000);
 }
 
 function pauseTimer(){
+if(timerInterval){
 clearInterval(timerInterval);
-timerInterval=null;
+timerInterval = null;
+}
 }
 
 function resetTimer(){
 pauseTimer();
-timerSeconds=Math.max(1,Number($('timerMinutes').value)||25)*60;
+
+const minutes = Math.max(1,Math.min(600,Number($("timerMinutes").value)||25));
+
+timerSeconds = minutes*60;
 showTimer();
 }
 
-const questionBank={
-'Matemática':[
-['Quanto é 8 × 7?',['54','56','64'],1],
-['Resolva: 2x = 18.',['x = 8','x = 9','x = 10'],1],
-['Quanto é 3/4 de 20?',['10','15','18'],1],
-['Quanto é 25 + 17?',['42','43','41'],0],
-['Um ângulo reto mede:',['45°','90°','180°'],1]
+/* ==========================================
+   MINI SIMULADOS
+========================================== */
+
+const questionBank = {
+"Matemática":[
+["Quanto é 8 × 7?",["54","56","64"],1],
+["Resolva: 2x = 18.",["x = 8","x = 9","x = 10"],1],
+["Quanto é 3/4 de 20?",["10","15","18"],1],
+["Quanto é 25 + 17?",["42","43","41"],0],
+["Um ângulo reto mede:",["45°","90°","180°"],1]
 ],
-'Português':[
-['Qual palavra é um substantivo?',['Correr','Beleza','Rapidamente'],1],
-['Qual é o plural de cidadão?',['Cidadões','Cidadãos','Cidadães'],1],
-['Qual é um verbo?',['Casa','Bonito','Estudar'],2],
-['Qual sinal encerra uma pergunta?',['?','!','.'],0],
-['Qual palavra é um adjetivo?',['Azul','Mesa','Pular'],0]
+"Português":[
+["Qual palavra é um substantivo?",["Correr","Beleza","Rapidamente"],1],
+["Qual é o plural de cidadão?",["Cidadões","Cidadãos","Cidadães"],1],
+["Qual é um verbo?",["Casa","Bonito","Estudar"],2],
+["Qual sinal encerra uma pergunta?",["?","!","."],0],
+["Qual palavra é um adjetivo?",["Azul","Mesa","Pular"],0]
 ],
-'História':[
-['O Egito Antigo se desenvolveu às margens de qual rio?',['Nilo','Amazonas','Tâmisa'],0],
-['A escrita dos egípcios era chamada:',['Cuneiforme','Hieróglifos','Latim'],1],
-['A Idade Média veio depois da:',['Antiguidade','Idade Moderna','Pré-História'],0],
-['A democracia surgiu na:',['Grécia','China','Rússia'],0]
+"História":[
+["O Egito Antigo se desenvolveu às margens de qual rio?",["Nilo","Amazonas","Tâmisa"],0],
+["A escrita dos egípcios era chamada:",["Cuneiforme","Hieróglifos","Latim"],1],
+["A Idade Média veio depois da:",["Antiguidade","Idade Moderna","Pré-História"],0],
+["A democracia surgiu na:",["Grécia","China","Rússia"],0]
 ],
-'Geografia':[
-['Qual é o maior continente?',['Europa','Ásia','Oceania'],1],
-['Qual é a capital do Brasil?',['São Paulo','Rio de Janeiro','Brasília'],2],
-['O movimento da Terra ao redor do Sol é:',['Rotação','Translação','Inclinação'],1]
+"Geografia":[
+["Qual é o maior continente?",["Europa","Ásia","Oceania"],1],
+["Qual é a capital do Brasil?",["São Paulo","Rio de Janeiro","Brasília"],2],
+["O movimento da Terra ao redor do Sol é:",["Rotação","Translação","Inclinação"],1]
 ],
-'Ciências':[
-['Qual órgão bombeia o sangue?',['Pulmão','Coração','Estômago'],1],
-['Qual gás as plantas absorvem na fotossíntese?',['Oxigênio','Gás carbônico','Hidrogênio'],1],
-['A água congela a aproximadamente:',['0 °C','50 °C','100 °C'],0]
+"Ciências":[
+["Qual órgão bombeia o sangue?",["Pulmão","Coração","Estômago"],1],
+["Qual gás as plantas absorvem na fotossíntese?",["Oxigênio","Gás carbônico","Hidrogênio"],1],
+["A água congela a aproximadamente:",["0 °C","50 °C","100 °C"],0]
 ],
-'Inglês':[
-['Como se diz casa em inglês?',['House','Book','Water'],0],
-['O passado de go é:',['Goed','Went','Gone'],1],
-['Good morning significa:',['Boa noite','Bom dia','Até logo'],1]
+"Inglês":[
+["Como se diz casa em inglês?",["House","Book","Water"],0],
+["O passado de go é:",["Goed","Went","Gone"],1],
+["Good morning significa:",["Boa noite","Bom dia","Até logo"],1]
 ]
 };
 
 function startQuiz(){
-quizQuestions=questionBank[$('quizSubject').value]||[];
-quizIndex=0;quizScore=0;
+quizQuestions = questionBank[$("quizSubject").value]||[];
+quizIndex = 0;
+quizScore = 0;
 renderQuestion();
 }
 
 function renderQuestion(){
 if(quizIndex>=quizQuestions.length){
-$('quizArea').innerHTML=`<h2>Simulado concluído!</h2><p>Você acertou ${quizScore} de ${quizQuestions.length} questões.</p><button onclick="startQuiz()">Refazer</button>`;
+$("quizArea").innerHTML = `
+<h2>Simulado concluído!</h2>
+<p>Você acertou ${quizScore} de ${quizQuestions.length} questões.</p>
+<button onclick="startQuiz()">Refazer</button>`;
 return;
 }
-let q=quizQuestions[quizIndex];
-$('quizArea').innerHTML=`
-<p class="muted">Questão ${quizIndex+1} de ${quizQuestions.length} · ${esc($('quizGrade').value)}</p>
+
+const q = quizQuestions[quizIndex];
+
+$("quizArea").innerHTML = `
+<p class="muted">Questão ${quizIndex+1} de ${quizQuestions.length} · ${esc($("quizGrade").value)}</p>
 <h2>${esc(q[0])}</h2>
-${q[1].map((o,i)=>`<button class="quiz-option" onclick="answerQuiz(${i})">${String.fromCharCode(65+i)}. ${esc(o)}</button>`).join('')}`;
+${q[1].map((option,i)=>`
+<button class="quiz-option" onclick="answerQuiz(${i})">
+${String.fromCharCode(65+i)}. ${esc(option)}
+</button>
+`).join("")}`;
 }
 
-function answerQuiz(i){
-if(i===quizQuestions[quizIndex][2])quizScore++;
+function answerQuiz(index){
+if(index===quizQuestions[quizIndex][2]){
+quizScore++;
+}
 quizIndex++;
 renderQuestion();
 }
 
-function changeAccent(c){
-if(!/^#[0-9a-f]{6}$/i.test(c))return;
-document.documentElement.style.setProperty('--accent',c);
-$('accentPicker').value=c;
-localStorage.setItem('mt_accent',c);
+/* ==========================================
+   PERSONALIZAÇÃO
+========================================== */
+
+function changeAccent(color){
+if(!/^#[0-9a-f]{6}$/i.test(color))return;
+
+document.documentElement.style.setProperty("--accent",color);
+$("accentPicker").value = color;
+
+try{
+localStorage.setItem(storagePrefix+"accent",color);
+}catch(error){
+toast("Não foi possível salvar a cor.");
+}
 }
 
 function changeAppearance(mode){
-let light=mode==='light',r=document.documentElement;
-r.style.setProperty('--bg',light?'#eef1f8':'#111022');
-r.style.setProperty('--surface',light?'#fff':'#1b1933');
-r.style.setProperty('--surface2',light?'#fff':'#252243');
-r.style.setProperty('--surface3',light?'#e2e6f0':'#302c52');
-r.style.setProperty('--text',light?'#20243a':'#f7f5ff');
-r.style.setProperty('--muted',light?'#68718a':'#aaa5c6');
-r.style.setProperty('--line',light?'rgba(25,35,60,.12)':'rgba(255,255,255,.09)');
-localStorage.setItem('mt_mode',mode);
+const light = mode==="light";
+const root = document.documentElement;
+
+const values = light?{
+"--bg":"#eef1f8",
+"--surface":"#ffffff",
+"--surface2":"#ffffff",
+"--surface3":"#e2e6f0",
+"--text":"#20243a",
+"--muted":"#68718a",
+"--line":"rgba(25,35,60,.12)"
+}:{
+"--bg":"#111022",
+"--surface":"#1b1933",
+"--surface2":"#252243",
+"--surface3":"#302c52",
+"--text":"#f7f5ff",
+"--muted":"#aaa5c6",
+"--line":"rgba(255,255,255,.09)"
+};
+
+Object.entries(values).forEach(([key,value])=>{
+root.style.setProperty(key,value);
+});
+
+localStorage.setItem(storagePrefix+"mode",mode);
 }
 
-function changeFont(f){
-document.documentElement.style.setProperty('--font',f);
-localStorage.setItem('mt_font',f);
+function changeFont(font){
+document.documentElement.style.setProperty("--font",font);
+localStorage.setItem(storagePrefix+"font",font);
 }
 
-function setWallpaper(e){
-let f=e.target.files[0];
-if(!f||!f.type.startsWith('image/'))return toast('Escolha uma imagem.');
-let r=new FileReader();
-r.onload=()=>{
-let img=new Image();
-img.onload=()=>{
-let c=document.createElement('canvas');
-let s=Math.min(1400/img.width,1000/img.height,1);
-c.width=img.width*s;c.height=img.height*s;
-c.getContext('2d').drawImage(img,0,0,c.width,c.height);
-let data=c.toDataURL('image/jpeg',.75);
+/* ==========================================
+   PAPEL DE PAREDE
+========================================== */
+
+function setWallpaper(event){
+const file = event.target.files?.[0];
+if(!file)return;
+
+if(!file.type.startsWith("image/")){
+return toast("Escolha uma imagem válida.");
+}
+
+if(file.size>15*1024*1024){
+return toast("Escolha uma imagem menor.");
+}
+
+const reader = new FileReader();
+
+reader.onload = ()=>{
+const image = new Image();
+
+image.onload = ()=>{
+const canvas = document.createElement("canvas");
+const scale = Math.min(1400/image.width,1000/image.height,1);
+
+canvas.width = Math.round(image.width*scale);
+canvas.height = Math.round(image.height*scale);
+
+const context = canvas.getContext("2d");
+context.drawImage(image,0,0,canvas.width,canvas.height);
+
+const data = canvas.toDataURL("image/jpeg",0.72);
+
 try{
-localStorage.setItem('mt_wallpaper',data);
+localStorage.setItem(storagePrefix+"wallpaper",data);
 applyWallpaper(data);
-toast('Papel de parede atualizado!');
-}catch{
-toast('Imagem muito grande. Escolha outra.');
+toast("Papel de parede atualizado!");
+}catch(error){
+toast("Imagem muito grande para armazenar. Escolha outra.");
 }
 };
-img.src=r.result;
+
+image.onerror = ()=>toast("Não foi possível carregar a imagem.");
+image.src = reader.result;
 };
-r.readAsDataURL(f);
+
+reader.onerror = ()=>toast("Erro ao ler imagem.");
+reader.readAsDataURL(file);
 }
 
 function applyWallpaper(data){
-document.body.style.backgroundImage=data
-?`linear-gradient(#11102288,#11102288),url("${data}")`
-:'radial-gradient(ellipse at 10% 0%,color-mix(in srgb,var(--accent) 15%,transparent),transparent 38%)';
-$('wallpaperPreview').src=data||'';
-$('wallpaperPreview').style.display=data?'block':'none';
+if(data){
+document.body.style.backgroundImage =
+`linear-gradient(#11102288,#11102288),url("${data}")`;
+}else{
+document.body.style.backgroundImage =
+"radial-gradient(ellipse at 10% 0%,color-mix(in srgb,var(--accent) 15%,transparent),transparent 38%)";
+}
+
+$("wallpaperPreview").src = data||"";
+$("wallpaperPreview").style.display = data?"block":"none";
 }
 
 function removeWallpaper(){
-localStorage.removeItem('mt_wallpaper');
+localStorage.removeItem(storagePrefix+"wallpaper");
 applyWallpaper(null);
-$('wallpaperInput').value='';
-toast('Papel de parede removido.');
+$("wallpaperInput").value = "";
+toast("Papel de parede removido.");
 }
 
+/* ==========================================
+   PIN
+========================================== */
+
 function savePin(){
-let p=$('newPin').value;
-if(!/^\d{4,8}$/.test(p))return toast('O PIN precisa ter de 4 a 8 números.');
-localStorage.setItem('mt_pin',p);
-$('newPin').value='';
-toast('PIN salvo!');
+const pin = $("newPin").value;
+
+if(!/^\d{4,8}$/.test(pin)){
+return toast("O PIN precisa ter de 4 a 8 números.");
+}
+
+localStorage.setItem(storagePrefix+"pin",pin);
+$("newPin").value = "";
+toast("PIN salvo!");
 }
 
 function removePin(){
-if(confirm('Remover o PIN?')){
-localStorage.removeItem('mt_pin');
-toast('PIN removido.');
+if(!localStorage.getItem(storagePrefix+"pin")){
+return toast("Nenhum PIN configurado.");
+}
+
+if(confirm("Remover o PIN?")){
+localStorage.removeItem(storagePrefix+"pin");
+toast("PIN removido.");
 }
 }
 
 function lockNow(){
-if(!localStorage.getItem('mt_pin'))return toast('Configure um PIN primeiro.');
-$('lockScreen').style.display='flex';
-$('unlockPin').value='';
-$('lockError').textContent='';
+if(!localStorage.getItem(storagePrefix+"pin")){
+return toast("Configure um PIN primeiro.");
+}
+
+$("lockScreen").style.display = "flex";
+$("unlockPin").value = "";
+$("lockError").textContent = "";
 }
 
 function unlockApp(){
-if($('unlockPin').value===localStorage.getItem('mt_pin')){
-$('lockScreen').style.display='none';
+const pin = localStorage.getItem(storagePrefix+"pin");
+
+if($("unlockPin").value===pin){
+$("lockScreen").style.display = "none";
+$("unlockPin").value = "";
 }else{
-$('lockError').textContent='PIN incorreto.';
+$("lockError").textContent = "PIN incorreto. Tente novamente.";
 }
 }
 
+/* ==========================================
+   BACKUP E RESTAURAÇÃO
+========================================== */
+
 function exportData(){
-let blob=new Blob([JSON.stringify({tasks,notes,finance,travels},null,2)],{type:'application/json'});
-let url=URL.createObjectURL(blob);
-let a=document.createElement('a');
-a.href=url;a.download='mytasks-backup.json';
-a.click();
+const backup = {
+version:2,
+date:new Date().toISOString(),
+tasks,
+notes,
+finance,
+travels
+};
+
+const blob = new Blob(
+[JSON.stringify(backup,null,2)],
+{type:"application/json"}
+);
+
+const url = URL.createObjectURL(blob);
+const link = document.createElement("a");
+
+link.href = url;
+link.download = "mytasks-backup.json";
+document.body.appendChild(link);
+link.click();
+link.remove();
+
 setTimeout(()=>URL.revokeObjectURL(url),1000);
+toast("Backup exportado!");
+}
+
+function importData(){
+$("backupInput").click();
+}
+
+function handleImport(event){
+const file = event.target.files?.[0];
+if(!file)return;
+
+const reader = new FileReader();
+
+reader.onload = ()=>{
+try{
+const data = JSON.parse(reader.result);
+
+if(!data || typeof data!=="object" ||
+!Array.isArray(data.tasks) ||
+!Array.isArray(data.notes) ||
+!Array.isArray(data.finance) ||
+!Array.isArray(data.travels)){
+throw new Error("Formato inválido");
+}
+
+if(!confirm("Importar backup? Os dados atuais dessas categorias serão substituídos.")){
+return;
+}
+
+tasks = data.tasks;
+notes = data.notes;
+finance = data.finance;
+travels = data.travels;
+
+saveAll();
+toast("Backup importado!");
+}catch(error){
+toast("Arquivo de backup inválido.");
+}
+};
+
+reader.onerror = ()=>toast("Não foi possível ler o arquivo.");
+reader.readAsText(file);
+event.target.value = "";
 }
 
 function clearAll(){
-if(!confirm('Isso apagará tarefas, notas, finanças e viagens. Continuar?'))return;
-tasks=[];notes=[];finance=[];travels=[];
-saveAll();
-toast('Dados apagados.');
+if(!confirm("Isso apagará tarefas, notas, finanças e viagens desta conta neste aparelho. Continuar?")){
+return;
 }
 
+tasks = [];
+notes = [];
+finance = [];
+travels = [];
+
+saveAll();
+toast("Dados apagados.");
+}
+
+/* ==========================================
+   INÍCIO E ATUALIZAÇÃO
+========================================== */
+
 function renderHome(){
-let done=tasks.filter(t=>t.done).length;
-$('totalTasks').textContent=tasks.length;
-$('pendingTasks').textContent=tasks.length-done;
-$('completedTasks').textContent=done;
-$('progress').textContent=(tasks.length?Math.round(done/tasks.length*100):0)+'%';
-let upcoming=tasks.filter(t=>!t.done).sort((a,b)=>(a.date||'9999').localeCompare(b.date||'9999')).slice(0,5);
-$('homeUpcoming').innerHTML=upcoming.map(t=>`
-<div class="item">${esc(t.name)} <small>${esc(t.date||'Sem data')}</small></div>
-`).join('')||'<p class="muted">Você não tem tarefas pendentes.</p>';
+const done = tasks.filter(t=>t.done).length;
+
+$("totalTasks").textContent = tasks.length;
+$("pendingTasks").textContent = tasks.length-done;
+$("completedTasks").textContent = done;
+
+$("progress").textContent =
+(tasks.length?Math.round(done/tasks.length*100):0)+"%";
+
+const upcoming = tasks
+.filter(t=>!t.done)
+.sort((a,b)=>(a.date||"9999").localeCompare(b.date||"9999"))
+.slice(0,5);
+
+$("homeUpcoming").innerHTML = upcoming.map(t=>`
+<div class="item">
+<div>
+<b>${esc(t.name)}</b>
+<small>${esc(t.date||"Sem data")}</small>
+</div>
+</div>
+`).join("") || '<p class="empty">Você não tem tarefas pendentes.</p>';
 }
 
 function renderAll(){
@@ -889,222 +1445,248 @@ renderHome();
 renderCalendar();
 }
 
-function init(){
-let ac=localStorage.getItem('mt_accent')||'#9b5cff';
-changeAccent(ac);
-let mode=localStorage.getItem('mt_mode')||'dark';
-$('appearance').value=mode;
+/* ==========================================
+   CONFIGURAÇÕES INICIAIS
+========================================== */
+
+function initApp(){
+if(appInitialized)return;
+
+appInitialized = true;
+
+const accent = localStorage.getItem(storagePrefix+"accent")||"#9b5cff";
+changeAccent(accent);
+
+const mode = localStorage.getItem(storagePrefix+"mode")||"dark";
+$("appearance").value = mode;
 changeAppearance(mode);
-let f=localStorage.getItem('mt_font');
-if(f){
-$('fontChoice').value=f;
-changeFont(f);
+
+const font = localStorage.getItem(storagePrefix+"font");
+if(font){
+const allowedFonts = [
+"Arial,sans-serif",
+"Verdana,sans-serif",
+"Georgia,serif",
+"'Courier New',monospace",
+"system-ui,sans-serif"
+];
+
+if(allowedFonts.includes(font)){
+$("fontChoice").value = font;
+changeFont(font);
 }
-applyWallpaper(localStorage.getItem('mt_wallpaper'));
-$('calendarDate').value=new Date().toISOString().slice(0,10);
+}
+
+const wallpaper = localStorage.getItem(storagePrefix+"wallpaper");
+applyWallpaper(wallpaper);
+
+$("calendarDate").value = localDate();
+
+loadData();
 renderAll();
 showTimer();
+
+if(currentUser){
+$("userEmail").textContent = currentUser.email||"Conta conectada";
+}
 }
 
-init();
-</script>
-<script>
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js");
-  });
-}
-</script>
-<!-- MYTASKS - AUTENTICAÇÃO SUPABASE -->
+/* ==========================================
+   AUTENTICAÇÃO SUPABASE
+========================================== */
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<style>
-#loginScreen {
-  position: fixed;
-  inset: 0;
-  z-index: 999999;
-  background: #101d32;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  font-family: Arial, sans-serif;
-  color: white;
+function showAuthMessage(message){
+$("authMessage").textContent = message;
 }
 
-#loginScreen.hidden {
-  display: none;
+function setAuthLoading(loading){
+$("loginButton").disabled = loading;
+$("registerButton").disabled = loading;
+
+$("loginButton").textContent = loading?"Aguarde...":"Entrar";
+$("registerButton").textContent = loading?"Aguarde...":"Criar minha conta";
 }
 
-.login-box {
-  width: 100%;
-  max-width: 380px;
-  background: #192a42;
-  padding: 28px;
-  border-radius: 20px;
-  box-shadow: 0 15px 45px #0006;
+function validSupabaseConfig(){
+return SUPABASE_URL.startsWith("https://") &&
+SUPABASE_URL.includes(".supabase.co") &&
+SUPABASE_ANON_KEY.length>20 &&
+!SUPABASE_URL.includes("COLOQUE") &&
+!SUPABASE_ANON_KEY.includes("COLOQUE");
 }
 
-.login-box h2 {
-  text-align: center;
-  margin-bottom: 8px;
+async function loginMyTasks(){
+if(!myTasksSupabase){
+return showAuthMessage("Configure a URL e a chave do Supabase no código.");
 }
 
-.login-box p {
-  text-align: center;
-  color: #a7bad2;
+const email = $("authEmail").value.trim();
+const password = $("authPassword").value;
+
+if(!email||!password){
+return showAuthMessage("Preencha o e-mail e a senha.");
 }
 
-.login-box input {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 14px;
-  margin-top: 13px;
-  border: 1px solid #40536c;
-  border-radius: 10px;
-  background: #101d32;
-  color: white;
-  font-size: 16px;
-}
+setAuthLoading(true);
+showAuthMessage("Verificando acesso...");
 
-.login-box button {
-  width: 100%;
-  padding: 14px;
-  margin-top: 14px;
-  border: 0;
-  border-radius: 10px;
-  background: #2f80ed;
-  color: white;
-  font-weight: bold;
-  font-size: 15px;
-  cursor: pointer;
-}
-
-#authMessage {
-  font-size: 13px;
-  margin-top: 15px;
-  text-align: center;
-}
-</style>
-
-<div id="loginScreen">
-  <div class="login-box">
-    <h2>MyTasks</h2>
-    <p>Entre ou crie sua conta</p>
-
-    <input
-      type="email"
-      id="authEmail"
-      placeholder="Seu e-mail"
-      autocomplete="email"
-    >
-
-    <input
-      type="password"
-      id="authPassword"
-      placeholder="Sua senha"
-      autocomplete="current-password"
-    >
-
-    <button onclick="loginMyTasks()">Entrar</button>
-
-    <button onclick="registerMyTasks()">
-      Criar minha conta
-    </button>
-
-    <div id="authMessage"></div>
-  </div>
-</div>
-
-<script>
-const SUPABASE_URL = "COLOQUE_SUA_PROJECT_URL";
-const SUPABASE_ANON_KEY = "COLOQUE_SUA_ANON_KEY";
-
-const myTasksSupabase = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
-);
-
-const loginScreen = document.getElementById("loginScreen");
-const authMessage = document.getElementById("authMessage");
-
-function showAuthMessage(message) {
-  authMessage.textContent = message;
-}
-
-async function loginMyTasks() {
-  const email = document.getElementById("authEmail").value.trim();
-  const password = document.getElementById("authPassword").value;
-
-  if (!email || !password) {
-    return showAuthMessage("Preencha o e-mail e a senha.");
-  }
-
-  showAuthMessage("Verificando acesso...");
-
-  const { error } = await myTasksSupabase.auth.signInWithPassword({
-    email,
-    password
-  });
-
-  if (error) {
-    return showAuthMessage(error.message);
-  }
-}
-
-async function registerMyTasks() {
-  const email = document.getElementById("authEmail").value.trim();
-  const password = document.getElementById("authPassword").value;
-
-  if (!email || !password) {
-    return showAuthMessage("Preencha o e-mail e a senha.");
-  }
-
-  if (password.length < 6) {
-    return showAuthMessage("Use uma senha com pelo menos 6 caracteres.");
-  }
-
-  showAuthMessage("Criando sua conta...");
-
-  const { data, error } = await myTasksSupabase.auth.signUp({
-    email,
-    password
-  });
-
-  if (error) {
-    return showAuthMessage(error.message);
-  }
-
-  if (!data.session) {
-    return showAuthMessage(
-      "Cadastro criado! Confira seu e-mail para confirmar a conta."
-    );
-  }
-
-  showAuthMessage("Conta criada!");
-}
-
-myTasksSupabase.auth.onAuthStateChange((event, session) => {
-  if (session) {
-    loginScreen.classList.add("hidden");
-  } else {
-    loginScreen.classList.remove("hidden");
-  }
+try{
+const {error} = await myTasksSupabase.auth.signInWithPassword({
+email,
+password
 });
 
-async function checkMyTasksSession() {
-  const { data, error } = await myTasksSupabase.auth.getSession();
-
-  if (!error && data.session) {
-    loginScreen.classList.add("hidden");
-  } else {
-    loginScreen.classList.remove("hidden");
-  }
+if(error){
+showAuthMessage(error.message);
+}else{
+showAuthMessage("Login realizado!");
+}
+}catch(error){
+showAuthMessage("Erro de conexão. Verifique sua internet.");
+console.error(error);
+}finally{
+setAuthLoading(false);
+}
 }
 
-checkMyTasksSession();
+async function registerMyTasks(){
+if(!myTasksSupabase){
+return showAuthMessage("Configure a URL e a chave do Supabase no código.");
+}
+
+const email = $("authEmail").value.trim();
+const password = $("authPassword").value;
+
+if(!email||!password){
+return showAuthMessage("Preencha o e-mail e a senha.");
+}
+
+if(password.length<6){
+return showAuthMessage("Use uma senha com pelo menos 6 caracteres.");
+}
+
+setAuthLoading(true);
+showAuthMessage("Criando sua conta...");
+
+try{
+const {data,error} = await myTasksSupabase.auth.signUp({
+email,
+password
+});
+
+if(error){
+showAuthMessage(error.message);
+}else if(!data.session){
+showAuthMessage("Cadastro criado! Confira seu e-mail para confirmar a conta.");
+}else{
+showAuthMessage("Conta criada com sucesso!");
+}
+}catch(error){
+showAuthMessage("Não foi possível criar a conta. Tente novamente.");
+console.error(error);
+}finally{
+setAuthLoading(false);
+}
+}
+
+async function logoutMyTasks(){
+if(!myTasksSupabase)return;
+
+if(!confirm("Deseja sair da sua conta?"))return;
+
+try{
+const {error} = await myTasksSupabase.auth.signOut();
+
+if(error){
+toast("Não foi possível sair da conta.");
+console.error(error);
+}
+}catch(error){
+toast("Erro ao encerrar sessão.");
+console.error(error);
+}
+}
+
+function handleSession(session){
+const login = $("loginScreen");
+const lock = $("lockScreen");
+
+if(session && session.user){
+currentUser = session.user;
+
+/* Os dados locais ficam separados por usuário neste aparelho. */
+storagePrefix = "mytasks_user_"+currentUser.id+"_";
+
+loadData();
+initApp();
+
+login.classList.add("hidden");
+login.style.display = "none";
+
+$("userEmail").textContent = currentUser.email||"Conta conectada";
+}else{
+currentUser = null;
+storagePrefix = "mytasks_guest_";
+
+pauseTimer();
+lock.style.display = "none";
+
+login.classList.remove("hidden");
+login.style.display = "flex";
+
+$("userEmail").textContent = "";
+}
+}
+
+async function initializeAuth(){
+if(!validSupabaseConfig()){
+$("loginScreen").style.display = "flex";
+showAuthMessage("Configure SUPABASE_URL e SUPABASE_ANON_KEY no código.");
+return;
+}
+
+try{
+myTasksSupabase = window.supabase.createClient(
+SUPABASE_URL,
+SUPABASE_ANON_KEY,
+{
+auth:{
+persistSession:true,
+autoRefreshToken:true,
+detectSessionInUrl:true
+}
+}
+);
+
+myTasksSupabase.auth.onAuthStateChange((event,session)=>{
+handleSession(session);
+});
+
+const {data,error} = await myTasksSupabase.auth.getSession();
+
+if(error){
+console.error(error);
+$("loginScreen").style.display = "flex";
+showAuthMessage("Não foi possível verificar sua sessão.");
+return;
+}
+
+handleSession(data.session);
+}catch(error){
+console.error("Erro ao iniciar Supabase:",error);
+$("loginScreen").style.display = "flex";
+showAuthMessage("Erro ao conectar com o Supabase.");
+}
+}
+
+/* ==========================================
+   INICIALIZAÇÃO FINAL
+========================================== */
+
+document.addEventListener("DOMContentLoaded",()=>{
+initializeAuth();
+});
 </script>
 
-<!-- FIM DA AUTENTICAÇÃO --></body>
+</body>
 </html>
